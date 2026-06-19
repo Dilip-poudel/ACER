@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coca-Cola | Real Magic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'coke-red': '#F40009',
+                        'coke-dark': '#111111',
+                        'coke-cream': '#F5F3EF',
+                        'coke-charcoal': '#1A1A1A',
+                    },
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .timeline-scroll::-webkit-scrollbar { height: 3px; }
+        .timeline-scroll::-webkit-scrollbar-track { background: transparent; }
+        .timeline-scroll::-webkit-scrollbar-thumb { background: #F40009; border-radius: 10px; }
+        .gradient-mesh {
+            background: radial-gradient(ellipse at 20% 50%, rgba(244,0,9,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 30%, rgba(244,0,9,0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255,255,255,0.6) 0%, transparent 50%),
+                linear-gradient(135deg, #F5F3EF 0%, #FAFAFA 50%, #F0EDE8 100%);
+        }
+        .product-panel { transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-panel:hover { flex: 1.5; }
+        .product-panel:hover .product-image { transform: scale(1.08) translateY(-12px); }
+        .product-panel:hover .product-bg { opacity: 1; }
+        .product-shot { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 28px 44px rgba(0,0,0,0.6)); }
+        .product-shot-original { object-position: 50% 50%; }
+        .product-shot-zero { object-position: 50% 50%; }
+        .product-shot-diet { object-position: 50% 50%; }
+        .timeline-scroll { scroll-snap-type: x mandatory; scroll-padding-left: 0.25rem; scroll-behavior: smooth; }
+        .timeline-card { transition: all 0.4s ease; scroll-snap-align: start; }
+        .timeline-card:hover { transform: translateY(-8px); }
+        .timeline-card:hover .timeline-img { transform: scale(1.05); }
+        .heritage-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), filter 0.8s ease; }
+        .timeline-card:hover .heritage-photo, .timeline-card:focus-within .heritage-photo { transform: scale(1.12); filter: saturate(1.08) contrast(1.05); }
+        .heritage-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0.28) 45%, rgba(0,0,0,0.05)); }
+        .heritage-reveal { transform: translateY(62px); opacity: 0.08; transition: transform 0.45s ease, opacity 0.45s ease; }
+        .timeline-card:hover .heritage-reveal, .timeline-card:focus-within .heritage-reveal { transform: translateY(0); opacity: 1; }
+        .timeline-nav-btn { width: 44px; height: 44px; border-radius: 9999px; border: 1px solid rgba(244,0,9,0.2); background: rgba(255,255,255,0.9); color: #F40009; display: inline-flex; align-items: center; justify-content: center; transition: all 0.25s ease; box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
+        .timeline-nav-btn:hover { background: #ed252c; color: white; transform: translateY(-2px); box-shadow: 0 16px 36px rgba(244,0,9,0.22); }
+        .timeline-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; background: rgba(255,255,255,0.7); color: rgba(26,26,26,0.35); }
+        .hero-text-layer { text-shadow: 0 4px 30px rgba(0,0,0,0.1); }
+        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(1deg); } }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        @keyframes subtlePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(244,0,9,0.2); } 50% { box-shadow: 0 0 0 8px rgba(244,0,9,0); } }
+        .pulse-cta { animation: subtlePulse 3s ease-in-out infinite; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        #fizzCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-track { animation: marquee 20s linear infinite; }
+        .marquee-track:hover { animation-play-state: paused; }
+        .tilt-card { transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+        .tilt-card .tilt-content { transform: translateZ(40px); }
+        .reveal { opacity: 0; transform: translateY(60px); transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal.reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal.reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal.reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal.reveal-delay-4 { transition-delay: 0.4s; }
+        .reveal.reveal-delay-5 { transition-delay: 0.5s; }
+        /* When removing active (scrolling up/out), reset delay to 0 for simultaneous fade-out */
+        .reveal:not(.active) { transition-delay: 0s !important; }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+        .reveal-delay-5 { transition-delay: 0.5s; }
+        @keyframes blobMorph { 0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; } 50% { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; } 75% { border-radius: 60% 40% 60% 30% / 70% 30% 50% 60%; } }
+        .blob-morph { animation: blobMorph 8s ease-in-out infinite; }
+        .liquid-btn { position: relative; overflow: hidden; z-index: 1; }
+        .liquid-btn::before { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: #F40009; transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: -1; border-radius: 50% 50% 0 0; }
+        .liquid-btn:hover::before { height: 180%; border-radius: 0; }
+        .liquid-btn:hover { color: white; }
+        .cursor-dot { width: 8px; height: 8px; background: #F40009; border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: transform 0.1s ease; mix-blend-mode: difference; }
+        .cursor-ring { width: 40px; height: 40px; border: 1px solid rgba(244,0,9,0.4); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transition: all 0.15s ease-out; }
+        .noise-overlay { position: relative; }
+        .noise-overlay::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.03; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); }
+        .magnetic { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+        .shimmer-text { background: linear-gradient(90deg, #ffffff 0%, #F40009 25%, #ffffff 50%, #F40009 75%, #ffffff 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite; }
+        .split-reveal { overflow: hidden; }
+        .split-reveal span { display: inline-block; transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .split-reveal.active span { transform: translateY(0); }
+        @keyframes pulse-ring { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; } 100% { transform: translate(-50%, -50%) scale(3); opacity: 0; } }
+        .product-gallery-item { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-gallery-item:hover { transform: translateY(-12px) scale(1.02); }
+        .product-gallery-item:hover .product-gallery-img { transform: scale(1.1); }
+        .product-gallery-img { transition: transform 0.6s ease; }
+        .portfolio-card-enter { opacity: 0; transform: translateY(34px) scale(0.92) rotate(1deg); filter: blur(10px); }
+        .portfolio-card-enter.active { opacity: 1; transform: translateY(0) scale(1) rotate(0); filter: blur(0); transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), filter 0.65s ease; }
+        .portfolio-flash { animation: portfolioFlash 0.8s ease; }
+        @keyframes portfolioFlash { 0% { box-shadow: 0 0 0 0 rgba(244,0,9,0.0); } 45% { box-shadow: 0 0 0 10px rgba(244,0,9,0.12); } 100% { box-shadow: 0 0 0 0 rgba(244,0,9,0); } }
+        .section-connector { position: relative; }
+        .section-connector::before { content: ''; position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 1px; height: 80px; background: linear-gradient(to bottom, transparent, #F40009, transparent); }
+        .stat-card { background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%); border: 1px solid rgba(244,0,9,0.1); transition: all 0.4s ease; }
+        .stat-card:hover { border-color: rgba(244,0,9,0.3); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+        .globe-dot { position: absolute; width: 14px; height: 14px; background: #F40009; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 0 0 rgba(244,0,9,0.4); border: 2px solid white; transform: translate(-50%, -50%); }
+        .globe-dot:hover { transform: translate(-50%, -50%) scale(1.6); box-shadow: 0 0 0 10px rgba(244,0,9,0.15); }
+        .globe-tooltip { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.3s ease; font-size: 13px; font-weight: 600; }
+        .globe-dot:hover .globe-tooltip { opacity: 1; bottom: 24px; }
+        #globalMap { height: clamp(360px, 48vw, 560px); width: 100%; background: #F5F3EF; z-index: 1; }
+        #globalMap .leaflet-control-attribution { font-size: 10px; color: rgba(26,26,26,0.45); background: rgba(245,243,239,0.8); }
+        #globalMap .leaflet-control-zoom { border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        #globalMap .leaflet-control-zoom a { color: #1A1A1A; border-color: rgba(26,26,26,0.08); }
+        .global-map-marker { width: 16px; height: 16px; border-radius: 50%; background: #F40009; border: 3px solid white; box-shadow: 0 8px 20px rgba(244,0,9,0.35), 0 0 0 8px rgba(244,0,9,0.12); }
+        .global-map-tooltip { border: 0; border-radius: 12px; padding: 10px 14px; color: #1A1A1A; box-shadow: 0 10px 30px rgba(0,0,0,0.14); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; }
+        .language-select { border: 1px solid rgba(244,0,9,0.25); border-radius: 9999px; background: rgba(255,255,255,0.85); color: #1A1A1A; font-size: 12px; font-weight: 700; padding: 9px 32px 9px 14px; outline: none; cursor: pointer; transition: all 0.25s ease; }
+        .language-select:hover, .language-select:focus { border-color: rgba(244,0,9,0.65); box-shadow: 0 10px 24px rgba(244,0,9,0.12); }
+        .product-modal { opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .product-modal.active { opacity: 1; pointer-events: auto; }
+        .product-modal-card { transform: translateY(24px) scale(0.98); transition: transform 0.25s ease; }
+        .product-modal.active .product-modal-card { transform: translateY(0) scale(1); }
+    </style>
+<base target="_blank">
+</head>
+<body class="bg-coke-cream text-coke-dark antialiased">
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot hidden lg:block" id="cursorDot"></div>
+    <div class="cursor-ring hidden lg:block" id="cursorRing"></div>
+
+    <!-- Navigation -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-500" id="navbar">
+        <div class="backdrop-blur-xl bg-white/70 border-b border-white/20">
+            <nav class="max-w-7xl mx-auto px-6 lg:px-10">
+                <div class="flex items-center justify-between h-16 lg:h-20">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-8 h-8 text-coke-red" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                        </svg>
+                        <span class="font-inter font-bold text-lg tracking-tight text-coke-dark">Coca-Cola</span>
+                    </div>
+
+                    <div class="hidden lg:flex items-center gap-10">
+                        <a href="#hero" class="magnetic text-sm font-medium text-coke-dark/70 hover:text-coke-red transition-colors duration-300 tracking-wide" data-i18n="navStory">Our Story</a>
+                        <a href="#heritage" class="magnetic text-sm font-medium text-coke-dark/70 hover:text-coke-red transition-colors duration-300 tracking-wide" data-i18n="navHeritage">Heritage</a>
+                        <a href="#products" class="magnetic text-sm font-medium text-coke-dark/70 hover:text-coke-red transition-colors duration-300 tracking-wide" data-i18n="navProducts">Products</a>
+                        <a href="#global" class="magnetic text-sm font-medium text-coke-dark/70 hover:text-coke-red transition-colors duration-300 tracking-wide" data-i18n="navGlobal">Global</a>
+                        <a href="#stats" class="magnetic text-sm font-medium text-coke-dark/70 hover:text-coke-red transition-colors duration-300 tracking-wide" data-i18n="navImpact">Impact</a>
+                        <a href="#gallery" class="magnetic text-sm font-medium text-coke-dark/70 hover:text-coke-red transition-colors duration-300 tracking-wide" data-i18n="navGallery">Gallery</a>
+                    </div>
+
+                    <div class="hidden lg:flex items-center gap-3">
+                        <select class="language-select" id="languageSelect" aria-label="Select language">
+                            <option value="en">EN</option>
+                            <option value="es">ES</option>
+                            <option value="de">DE</option>
+                            <option value="hi">HI</option>
+                        </select>
+                        <button class="liquid-btn px-6 py-2.5 text-sm font-semibold text-coke-red border border-coke-red/30 rounded-full transition-all duration-500 tracking-wide">
+                            <span data-i18n="findStore">Find a Store</span>
+                        </button>
+                    </div>
+
+                    <button class="lg:hidden p-2" id="mobileMenuBtn">
+                        <svg class="w-6 h-6 text-coke-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+        </div>
+
+        <div class="lg:hidden hidden bg-white/95 backdrop-blur-xl border-b border-gray-100" id="mobileMenu">
+            <div class="px-6 py-6 space-y-4">
+                <a href="#hero" class="block text-base font-medium text-coke-dark/80 hover:text-coke-red transition-colors" data-i18n="navStory">Our Story</a>
+                <a href="#heritage" class="block text-base font-medium text-coke-dark/80 hover:text-coke-red transition-colors" data-i18n="navHeritage">Heritage</a>
+                <a href="#products" class="block text-base font-medium text-coke-dark/80 hover:text-coke-red transition-colors" data-i18n="navProducts">Products</a>
+                <a href="#global" class="block text-base font-medium text-coke-dark/80 hover:text-coke-red transition-colors" data-i18n="navGlobal">Global</a>
+                <a href="#stats" class="block text-base font-medium text-coke-dark/80 hover:text-coke-red transition-colors" data-i18n="navImpact">Impact</a>
+                <a href="#gallery" class="block text-base font-medium text-coke-dark/80 hover:text-coke-red transition-colors" data-i18n="navGallery">Gallery</a>
+                <select class="language-select w-full" id="mobileLanguageSelect" aria-label="Select language">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="de">German</option>
+                    <option value="hi">Hindi</option>
+                </select>
+                <button class="w-full mt-4 px-6 py-3 text-sm font-semibold text-coke-red border border-coke-red rounded-full" data-i18n="findStore">Find a Store</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="relative min-h-screen gradient-mesh overflow-hidden pt-20 lg:pt-0 noise-overlay">
+            <canvas id="fizzCanvas"></canvas>
+            <div class="max-w-7xl mx-auto px-6 lg:px-10 min-h-screen flex items-center relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center w-full py-16 lg:py-0">
+                    <div class="lg:col-span-7 relative z-10 order-2 lg:order-1">
+                        <div class="relative">
+                            <h1 class="font-inter font-black text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] leading-[0.85] tracking-tighter text-coke-dark hero-text-layer">
+                                <span class="block relative z-20 split-reveal" id="heroReal"><span>Real</span></span>
+                                <span class="block relative z-10 -mt-2 lg:-mt-4 text-coke-red split-reveal" id="heroMagic"><span>Magic.</span></span>
+                            </h1>
+                            <div class="mt-8 lg:mt-12 lg:ml-4 max-w-md reveal">
+                                <p class="text-base lg:text-lg text-coke-dark/60 font-light leading-relaxed tracking-wide">
+                                    Crafted in 1886. Loved across 200+ nations. 
+                                    The original taste that turned a simple moment into something extraordinary.
+                                </p>
+                                <div class="mt-8 flex items-center gap-6">
+                                    <button class="pulse-cta px-8 py-4 bg-coke-red text-white font-semibold text-sm rounded-full hover:bg-coke-dark transition-all duration-500 tracking-wide magnetic" data-i18n="experienceIt">
+                                        Experience It
+                                    </button>
+                                    <a href="#heritage" class="group flex items-center gap-2 text-sm font-medium text-coke-dark/70 hover:text-coke-red transition-colors duration-300">
+                                        <span data-i18n="discoverStory">Discover Our Story</span>
+                                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5 relative order-1 lg:order-2 flex justify-center lg:justify-end">
+                        <div class="relative w-64 h-80 sm:w-80 sm:h-96 lg:w-96 lg:h-[500px] float-anim">
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 lg:w-96 lg:h-96 rounded-full bg-coke-red/5 blur-3xl blob-morph"></div>
+                            <div class="absolute top-1/3 right-0 w-48 h-48 rounded-full bg-coke-red/10 blur-2xl blob-morph" style="animation-delay: -2s;"></div>
+                            <div class="relative w-full h-full flex items-center justify-center">
+                                <svg viewBox="0 0 220 60" class="w-48 sm:w-64 lg:w-80 h-auto" style="filter: drop-shadow(0 20px 40px rgba(244,0,9,0.3));">
+                                    <text x="5" y="45" font-family="Georgia, serif" font-size="40" font-style="italic" font-weight="bold" fill="#F40009">Coca-Cola</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
+                <span class="text-xs font-medium tracking-widest text-coke-dark/40 uppercase">Scroll</span>
+                <div class="w-px h-8 bg-coke-dark/20 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1/2 bg-coke-red animate-pulse"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Kinetic Marquee -->
+        <section class="py-12 bg-coke-dark overflow-hidden noise-overlay">
+            <div class="relative">
+                <div class="marquee-track flex whitespace-nowrap">
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-transparent tracking-tighter mx-8" style="-webkit-text-stroke: 1px rgba(244,0,9,0.3);">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-coke-red tracking-tighter mx-8">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-transparent tracking-tighter mx-8" style="-webkit-text-stroke: 1px rgba(244,0,9,0.3);">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-coke-red/50 tracking-tighter mx-8">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-transparent tracking-tighter mx-8" style="-webkit-text-stroke: 1px rgba(244,0,9,0.3);">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-coke-red tracking-tighter mx-8">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-transparent tracking-tighter mx-8" style="-webkit-text-stroke: 1px rgba(244,0,9,0.3);">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-coke-red/50 tracking-tighter mx-8">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-transparent tracking-tighter mx-8" style="-webkit-text-stroke: 1px rgba(244,0,9,0.3);">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-coke-red tracking-tighter mx-8">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-transparent tracking-tighter mx-8" style="-webkit-text-stroke: 1px rgba(244,0,9,0.3);">Real Magic</span>
+                    <span class="font-inter font-black text-6xl sm:text-8xl lg:text-9xl text-coke-red/50 tracking-tighter mx-8">Real Magic</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Heritage Timeline -->
+        <section id="heritage" class="py-24 lg:py-32 bg-white relative overflow-hidden section-connector">
+            <div class="absolute top-0 right-0 w-1/3 h-full bg-coke-cream/50"></div>
+            <div class="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
+                <div class="mb-16 lg:mb-24 reveal">
+                    <div class="flex items-end justify-between flex-wrap gap-6">
+                        <div>
+                            <span class="text-xs font-semibold tracking-[0.3em] text-coke-red uppercase mb-4 block" data-i18n="since1886">Since 1886</span>
+                            <h2 class="font-inter font-black text-4xl sm:text-5xl lg:text-7xl tracking-tighter text-coke-dark leading-none">
+                                <span data-i18n-html="heritageTitle">A Legacy<br>of Moments</span>
+                            </h2>
+                        </div>
+                        <p class="text-sm lg:text-base text-coke-dark/50 max-w-xs font-light leading-relaxed">
+                            From a pharmacy in Atlanta to the most recognized brand on Earth. 
+                            Every bottle tells a story.
+                        </p>
+                        <div class="hidden sm:flex items-center gap-3">
+                            <button class="timeline-nav-btn" id="timelinePrev" type="button" aria-label="Previous timeline card">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <button class="timeline-nav-btn" id="timelineNext" type="button" aria-label="Next timeline card">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-scroll overflow-x-auto pb-8 px-1" id="timelineSlider">
+                    <div class="flex gap-6 lg:gap-8 min-w-max">
+                        <div class="timeline-card tilt-card w-72 lg:w-80 flex-shrink-0 group cursor-pointer focus:outline-none" data-tilt tabindex="0">
+                            <div class="relative h-96 lg:h-[420px] bg-coke-cream rounded-2xl overflow-hidden mb-5">
+                                <div class="timeline-img absolute inset-0 transition-transform duration-700">
+                                    <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Cocacola-5cents-1900_edit1.jpg" alt="Vintage Coca-Cola five cents advertisement" class="heritage-photo" />
+                                </div>
+                                <div class="heritage-overlay"></div>
+                                <div class="absolute top-5 left-5 tilt-content">
+                                    <span class="text-5xl lg:text-6xl font-black text-white/25">1886</span>
+                                </div>
+                                <div class="absolute bottom-5 left-5 right-5 tilt-content text-white">
+                                    <div class="h-px bg-white/20 mb-3"></div>
+                                    <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">The Beginning</span>
+                                    <div class="heritage-reveal mt-3">
+                                        <h3 class="font-inter font-bold text-xl mb-2">Dr. Pemberton's Elixir</h3>
+                                        <p class="text-sm text-white/70 font-light leading-relaxed">Created in a brass kettle in Jacobs' Pharmacy. The first glass sold for five cents.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-card tilt-card w-72 lg:w-80 flex-shrink-0 group cursor-pointer focus:outline-none" data-tilt tabindex="0">
+                            <div class="relative h-96 lg:h-[420px] bg-coke-cream rounded-2xl overflow-hidden mb-5">
+                                <div class="timeline-img absolute inset-0 transition-transform duration-700">
+                                    <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Coca-Cola_1915_Contour_bottle.jpg" alt="Coca-Cola contour bottle" class="heritage-photo" />
+                                </div>
+                                <div class="heritage-overlay"></div>
+                                <div class="absolute top-5 left-5 tilt-content">
+                                    <span class="text-5xl lg:text-6xl font-black text-white/25">1915</span>
+                                </div>
+                                <div class="absolute bottom-5 left-5 right-5 tilt-content text-white">
+                                    <div class="h-px bg-white/20 mb-3"></div>
+                                    <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">The Icon</span>
+                                    <div class="heritage-reveal mt-3">
+                                        <h3 class="font-inter font-bold text-xl mb-2">The Contour Bottle</h3>
+                                        <p class="text-sm text-white/70 font-light leading-relaxed">Designed to be recognizable in the dark or broken on the ground. The world's most famous silhouette.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-card tilt-card w-72 lg:w-80 flex-shrink-0 group cursor-pointer focus:outline-none" data-tilt tabindex="0">
+                            <div class="relative h-96 lg:h-[420px] bg-coke-cream rounded-2xl overflow-hidden mb-5">
+                                <div class="timeline-img absolute inset-0 transition-transform duration-700">
+                                    <img src="https://img.youtube.com/vi/1VM2eLhvsSM/maxresdefault.jpg" alt="Coca-Cola Hilltop commercial still" class="heritage-photo" />
+                                </div>
+                                <div class="heritage-overlay"></div>
+                                <div class="absolute top-5 left-5 tilt-content">
+                                    <span class="text-5xl lg:text-6xl font-black text-white/25">1971</span>
+                                </div>
+                                <div class="absolute bottom-5 left-5 right-5 tilt-content text-white">
+                                    <div class="h-px bg-white/20 mb-3"></div>
+                                    <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">The Hilltop</span>
+                                    <div class="heritage-reveal mt-3">
+                                        <h3 class="font-inter font-bold text-xl mb-2">"I'd Like to Buy the World a Coke"</h3>
+                                        <p class="text-sm text-white/70 font-light leading-relaxed">The most famous commercial in history. A message of unity that still resonates today.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-card tilt-card w-72 lg:w-80 flex-shrink-0 group cursor-pointer focus:outline-none" data-tilt tabindex="0">
+                            <div class="relative h-96 lg:h-[420px] bg-coke-cream rounded-2xl overflow-hidden mb-5">
+                                <div class="timeline-img absolute inset-0 transition-transform duration-700">
+                                    <img src="https://www.coca-cola.com/content/dam/onexp/ca/en/brands/coca-cola/products/content-card-assets/v2/en-card-original-taste.jpg" alt="Modern Coca-Cola Original Taste product" class="heritage-photo" />
+                                </div>
+                                <div class="heritage-overlay"></div>
+                                <div class="absolute top-5 left-5 tilt-content">
+                                    <span class="text-5xl lg:text-6xl font-black text-white/25">2021</span>
+                                </div>
+                                <div class="absolute bottom-5 left-5 right-5 tilt-content text-white">
+                                    <div class="h-px bg-white/20 mb-3"></div>
+                                    <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">Real Magic</span>
+                                    <div class="heritage-reveal mt-3">
+                                        <h3 class="font-inter font-bold text-xl mb-2">A New Chapter</h3>
+                                        <p class="text-sm text-white/70 font-light leading-relaxed">Embracing the extraordinary in the ordinary. Real Magic celebrates human connection.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-card tilt-card w-72 lg:w-80 flex-shrink-0 group cursor-pointer focus:outline-none" data-tilt tabindex="0">
+                            <div class="relative h-96 lg:h-[420px] bg-coke-cream rounded-2xl overflow-hidden mb-5">
+                                <div class="timeline-img absolute inset-0 transition-transform duration-700">
+                                    <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=1200&q=85" alt="Recycling and sustainability" class="heritage-photo" />
+                                </div>
+                                <div class="heritage-overlay"></div>
+                                <div class="absolute top-5 left-5 tilt-content">
+                                    <span class="text-5xl lg:text-6xl font-black text-white/25">Today</span>
+                                </div>
+                                <div class="absolute bottom-5 left-5 right-5 tilt-content text-white">
+                                    <div class="h-px bg-white/20 mb-3"></div>
+                                    <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">The Future</span>
+                                    <div class="heritage-reveal mt-3">
+                                        <h3 class="font-inter font-bold text-xl mb-2">World Without Waste</h3>
+                                        <p class="text-sm text-white/70 font-light leading-relaxed">Committed to collecting and recycling a bottle or can for every one we sell by 2030.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 mt-6 lg:hidden">
+                    <svg class="w-5 h-5 text-coke-dark/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                    <span class="text-xs font-medium text-coke-dark/30 tracking-wide">Swipe to explore</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Brand Values -->
+        <section class="py-24 lg:py-40 bg-white relative overflow-hidden section-connector">
+            <div class="max-w-7xl mx-auto px-6 lg:px-10">
+                <div class="text-center mb-16 reveal">
+                    <span class="text-xs font-semibold tracking-[0.3em] text-coke-red uppercase mb-4 block">What We Stand For</span>
+                    <h2 class="font-inter font-black text-4xl sm:text-5xl lg:text-7xl tracking-tighter text-coke-dark leading-none mb-6">
+                        The Coca-Cola<br>Way
+                    </h2>
+                    <p class="text-base text-coke-dark/50 max-w-xl mx-auto font-light">
+                        Four principles that have guided us for over a century.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="group bg-coke-cream rounded-2xl p-8 transition-all duration-500 hover:bg-coke-red hover:scale-105 cursor-pointer reveal">
+                        <div class="w-12 h-12 rounded-xl bg-coke-red/10 group-hover:bg-white/20 flex items-center justify-center mb-6 transition-colors">
+                            <svg class="w-6 h-6 text-coke-red group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-inter font-bold text-xl text-coke-dark group-hover:text-white mb-2 transition-colors">Refreshing</h3>
+                        <p class="text-sm text-coke-dark/50 group-hover:text-white/70 font-light transition-colors">A moment of pause, a burst of flavor, an instant of pure refreshment.</p>
+                    </div>
+                    <div class="group bg-coke-cream rounded-2xl p-8 transition-all duration-500 hover:bg-coke-red hover:scale-105 cursor-pointer reveal reveal-delay-1">
+                        <div class="w-12 h-12 rounded-xl bg-coke-red/10 group-hover:bg-white/20 flex items-center justify-center mb-6 transition-colors">
+                            <svg class="w-6 h-6 text-coke-red group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-inter font-bold text-xl text-coke-dark group-hover:text-white mb-2 transition-colors">Iconic</h3>
+                        <p class="text-sm text-coke-dark/50 group-hover:text-white/70 font-light transition-colors">The most recognized brand on Earth. A symbol shared across cultures.</p>
+                    </div>
+                    <div class="group bg-coke-cream rounded-2xl p-8 transition-all duration-500 hover:bg-coke-red hover:scale-105 cursor-pointer reveal reveal-delay-2">
+                        <div class="w-12 h-12 rounded-xl bg-coke-red/10 group-hover:bg-white/20 flex items-center justify-center mb-6 transition-colors">
+                            <svg class="w-6 h-6 text-coke-red group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-inter font-bold text-xl text-coke-dark group-hover:text-white mb-2 transition-colors">Timeless</h3>
+                        <p class="text-sm text-coke-dark/50 group-hover:text-white/70 font-light transition-colors">Since 1886, the same great taste. A recipe that transcends generations.</p>
+                    </div>
+                    <div class="group bg-coke-cream rounded-2xl p-8 transition-all duration-500 hover:bg-coke-red hover:scale-105 cursor-pointer reveal reveal-delay-3">
+                        <div class="w-12 h-12 rounded-xl bg-coke-red/10 group-hover:bg-white/20 flex items-center justify-center mb-6 transition-colors">
+                            <svg class="w-6 h-6 text-coke-red group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-inter font-bold text-xl text-coke-dark group-hover:text-white mb-2 transition-colors">Universal</h3>
+                        <p class="text-sm text-coke-dark/50 group-hover:text-white/70 font-light transition-colors">Loved in 200+ nations. A language everyone understands.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Choose Your Chill -->
+        <section id="products" class="py-24 lg:py-0 lg:min-h-screen bg-coke-dark relative overflow-hidden noise-overlay section-connector">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-coke-red/10 rounded-full blur-[120px] pointer-events-none blob-morph"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-coke-red/5 rounded-full blur-[120px] pointer-events-none blob-morph" style="animation-delay: -4s;"></div>
+            <div class="max-w-7xl mx-auto px-6 lg:px-10 lg:h-screen flex flex-col justify-center py-16 lg:py-0 relative z-10">
+                <div class="mb-12 lg:mb-16 text-center lg:text-left reveal">
+                            <span class="text-xs font-semibold tracking-[0.3em] text-coke-red uppercase mb-4 block" data-i18n="collection">The Collection</span>
+                            <h2 class="font-inter font-black text-4xl sm:text-5xl lg:text-7xl tracking-tighter text-white leading-none shimmer-text">
+                        <span data-i18n-html="productsTitle">Choose Your<br>Chill</span>
+                    </h2>
+                </div>
+                <div class="flex flex-col lg:flex-row gap-4 lg:gap-2 lg:h-[500px]">
+                    <div class="product-panel relative flex-1 min-h-[300px] lg:min-h-0 rounded-3xl overflow-hidden cursor-pointer group" data-product="classic" role="button" tabindex="0">
+                        <div class="product-bg absolute inset-0 bg-gradient-to-b from-coke-red/20 via-coke-red/10 to-coke-red/30 opacity-0 transition-opacity duration-700"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-coke-dark/80 via-transparent to-transparent"></div>
+                        <div class="relative h-full flex flex-col justify-end p-6 lg:p-8">
+                            <div class="product-image transition-all duration-700 absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-80 lg:w-80 lg:h-[420px]">
+                                <img
+                                    src="https://freepngimg.com/download/cocacola/26-coca-cola-bottle-png-image.png"
+                                    alt="Coca-Cola Original Taste bottle"
+                                    class="product-shot product-shot-original"
+                                />
+                            </div>
+                            <div class="relative z-10">
+                                <span class="text-xs font-semibold tracking-widest text-white/40 uppercase mb-2 block" data-i18n="original">The Original</span>
+                                <h3 class="font-inter font-black text-2xl lg:text-3xl text-white tracking-tight mb-2" data-i18n="classic">Classic</h3>
+                                <p class="text-sm text-white/50 font-light mb-4 max-w-xs">The authentic taste that started it all. Bold, refreshing, unmistakable.</p>
+                                <div class="flex items-center gap-2 text-coke-red font-semibold text-sm group-hover:gap-4 transition-all duration-300">
+                                    <span data-i18n="explore">Explore</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-panel relative flex-1 min-h-[300px] lg:min-h-0 rounded-3xl overflow-hidden cursor-pointer group" data-product="zero" role="button" tabindex="0">
+                        <div class="product-bg absolute inset-0 bg-gradient-to-b from-coke-red/10 via-coke-red/5 to-coke-red/15 opacity-0 transition-opacity duration-700"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-coke-dark/80 via-transparent to-transparent"></div>
+                        <div class="relative h-full flex flex-col justify-end p-6 lg:p-8">
+                            <div class="product-image transition-all duration-700 absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-80 lg:w-80 lg:h-[420px]">
+                                <img
+                                    src="https://freepngimg.com/download/coca_cola/6-coca-cola-zero-bottle-png-image.png"
+                                    alt="Coca-Cola Zero Sugar can"
+                                    class="product-shot product-shot-zero"
+                                />
+                            </div>
+                            <div class="relative z-10">
+                                <span class="text-xs font-semibold tracking-widest text-white/40 uppercase mb-2 block" data-i18n="noCompromise">No Compromise</span>
+                                <h3 class="font-inter font-black text-2xl lg:text-3xl text-white tracking-tight mb-2" data-i18n="zeroSugar">Zero Sugar</h3>
+                                <p class="text-sm text-white/50 font-light mb-4 max-w-xs">All the iconic taste. Zero sugar. Zero calories. Full refreshment.</p>
+                                <div class="flex items-center gap-2 text-coke-red font-semibold text-sm group-hover:gap-4 transition-all duration-300">
+                                    <span data-i18n="explore">Explore</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-panel relative flex-1 min-h-[300px] lg:min-h-0 rounded-3xl overflow-hidden cursor-pointer group" data-product="diet" role="button" tabindex="0">
+                        <div class="product-bg absolute inset-0 bg-gradient-to-b from-coke-red/15 via-coke-red/5 to-coke-red/20 opacity-0 transition-opacity duration-700"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-coke-dark/80 via-transparent to-transparent"></div>
+                        <div class="relative h-full flex flex-col justify-end p-6 lg:p-8">
+                            <div class="product-image transition-all duration-700 absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-80 lg:w-80 lg:h-[420px]">
+                                <img
+                                    src="https://www.pngall.com/wp-content/uploads/15/Diet-Coke-PNG-HD-Image.png"
+                                    alt="Diet Coke bottle"
+                                    class="product-shot product-shot-diet"
+                                />
+                            </div>
+                            <div class="relative z-10">
+                                <span class="text-xs font-semibold tracking-widest text-white/40 uppercase mb-2 block" data-i18n="lightCrisp">Light & Crisp</span>
+                                <h3 class="font-inter font-black text-2xl lg:text-3xl text-white tracking-tight mb-2">Diet Coke</h3>
+                                <p class="text-sm text-white/50 font-light mb-4 max-w-xs">Lighter, crisper, with a distinctively different flavor profile.</p>
+                                <div class="flex items-center gap-2 text-coke-red font-semibold text-sm group-hover:gap-4 transition-all duration-300">
+                                    <span data-i18n="explore">Explore</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statement Section -->
+        <section class="py-24 lg:py-40 bg-coke-cream relative overflow-hidden noise-overlay section-connector">
+            <div class="absolute inset-0 flex items-center justify-center opacity-[0.03]">
+                <span class="font-inter font-black text-[20rem] lg:text-[30rem] text-coke-dark tracking-tighter select-none">Coke</span>
+            </div>
+            <div class="max-w-5xl mx-auto px-6 lg:px-10 text-center relative z-10">
+                <span class="text-xs font-semibold tracking-[0.3em] text-coke-red uppercase mb-8 block reveal">Our Promise</span>
+                <h2 class="font-inter font-black text-3xl sm:text-4xl lg:text-6xl xl:text-7xl tracking-tighter text-coke-dark leading-[1.1] mb-8 reveal reveal-delay-1">
+                    Refreshing the world.<br>
+                    <span class="text-coke-red">Making a difference.</span>
+                </h2>
+                <p class="text-base lg:text-lg text-coke-dark/50 max-w-2xl mx-auto font-light leading-relaxed mb-10 reveal reveal-delay-2">
+                    We believe in creating a better shared future. From sustainable packaging to 
+                    community programs, every sip contributes to something bigger.
+                </p>
+                <button class="liquid-btn px-8 py-4 text-sm font-semibold text-coke-red border border-coke-red/30 rounded-full transition-all duration-500 tracking-wide reveal reveal-delay-3">
+                    Our Sustainability Mission
+                </button>
+            </div>
+        </section>
+
+        <!-- GLOBAL PRESENCE -->
+        <section id="global" class="py-24 lg:py-32 bg-white relative overflow-hidden section-connector">
+            <div class="absolute top-0 left-0 w-1/2 h-full bg-coke-cream/30"></div>
+            <div class="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
+                <div class="mb-16 lg:mb-20 reveal">
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                        <div>
+                            <span class="text-xs font-semibold tracking-[0.3em] text-coke-red uppercase mb-4 block" data-i18n="worldwide">Worldwide Operations</span>
+                            <h2 class="font-inter font-black text-4xl sm:text-5xl lg:text-7xl tracking-tighter text-coke-dark leading-none">
+                                <span data-i18n-html="globalTitle">Global<br>Refreshment<br>Network</span>
+                            </h2>
+                        </div>
+                        <p class="text-sm lg:text-base text-coke-dark/50 max-w-sm font-light leading-relaxed">
+                            900+ bottling plants across 200+ countries. Every day, we bring the taste of refreshment to billions.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="relative bg-coke-cream rounded-3xl overflow-hidden p-8 lg:p-12 reveal">
+                    <div class="relative w-full bg-coke-cream rounded-2xl overflow-hidden">
+                        <div id="globalMap" aria-label="Global Coca-Cola locations map"></div>
+                    </div>
+
+                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="stat-card p-6 rounded-2xl cursor-pointer hover:border-coke-red/30 transition-all">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-3 h-3 rounded-full bg-coke-red"></div>
+                                <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">North America</span>
+                            </div>
+                            <h4 class="font-inter font-bold text-lg text-coke-dark mb-1">Atlanta, Georgia</h4>
+                            <p class="text-sm text-coke-dark/50 font-light">World Headquarters & Flagship Plant</p>
+                            <div class="mt-3 flex items-center gap-2 text-xs text-coke-dark/40">
+                                <span>42 factories</span>
+                                <span class="w-1 h-1 rounded-full bg-coke-dark/20"></span>
+                                <span>65,000 employees</span>
+                            </div>
+                        </div>
+                        <div class="stat-card p-6 rounded-2xl cursor-pointer hover:border-coke-red/30 transition-all">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-3 h-3 rounded-full bg-coke-red"></div>
+                                <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">Europe</span>
+                            </div>
+                            <h4 class="font-inter font-bold text-lg text-coke-dark mb-1">Madrid, Spain</h4>
+                            <p class="text-sm text-coke-dark/50 font-light">European Operations Center</p>
+                            <div class="mt-3 flex items-center gap-2 text-xs text-coke-dark/40">
+                                <span>68 factories</span>
+                                <span class="w-1 h-1 rounded-full bg-coke-dark/20"></span>
+                                <span>52,000 employees</span>
+                            </div>
+                        </div>
+                        <div class="stat-card p-6 rounded-2xl cursor-pointer hover:border-coke-red/30 transition-all">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-3 h-3 rounded-full bg-coke-red"></div>
+                                <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">Asia Pacific</span>
+                            </div>
+                            <h4 class="font-inter font-bold text-lg text-coke-dark mb-1">Shanghai, China</h4>
+                            <p class="text-sm text-coke-dark/50 font-light">Asia Pacific Hub</p>
+                            <div class="mt-3 flex items-center gap-2 text-xs text-coke-dark/40">
+                                <span>127 factories</span>
+                                <span class="w-1 h-1 rounded-full bg-coke-dark/20"></span>
+                                <span>98,000 employees</span>
+                            </div>
+                        </div>
+                        <div class="stat-card p-6 rounded-2xl cursor-pointer hover:border-coke-red/30 transition-all">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-3 h-3 rounded-full bg-coke-red"></div>
+                                <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">Latin America</span>
+                            </div>
+                            <h4 class="font-inter font-bold text-lg text-coke-dark mb-1">Mexico City, Mexico</h4>
+                            <p class="text-sm text-coke-dark/50 font-light">Latin America Headquarters</p>
+                            <div class="mt-3 flex items-center gap-2 text-xs text-coke-dark/40">
+                                <span>89 factories</span>
+                                <span class="w-1 h-1 rounded-full bg-coke-dark/20"></span>
+                                <span>71,000 employees</span>
+                            </div>
+                        </div>
+                        <div class="stat-card p-6 rounded-2xl cursor-pointer hover:border-coke-red/30 transition-all">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-3 h-3 rounded-full bg-coke-red"></div>
+                                <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">Africa</span>
+                            </div>
+                            <h4 class="font-inter font-bold text-lg text-coke-dark mb-1">Johannesburg, South Africa</h4>
+                            <p class="text-sm text-coke-dark/50 font-light">Africa Operations Center</p>
+                            <div class="mt-3 flex items-center gap-2 text-xs text-coke-dark/40">
+                                <span>34 factories</span>
+                                <span class="w-1 h-1 rounded-full bg-coke-dark/20"></span>
+                                <span>28,000 employees</span>
+                            </div>
+                        </div>
+                        <div class="stat-card p-6 rounded-2xl cursor-pointer hover:border-coke-red/30 transition-all">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-3 h-3 rounded-full bg-coke-red"></div>
+                                <span class="text-xs font-semibold tracking-widest text-coke-red uppercase">Oceania</span>
+                            </div>
+                            <h4 class="font-inter font-bold text-lg text-coke-dark mb-1">Sydney, Australia</h4>
+                            <p class="text-sm text-coke-dark/50 font-light">Oceania Distribution Hub</p>
+                            <div class="mt-3 flex items-center gap-2 text-xs text-coke-dark/40">
+                                <span>18 factories</span>
+                                <span class="w-1 h-1 rounded-full bg-coke-dark/20"></span>
+                                <span>12,000 employees</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats section -->
+        <section id="stats" class="py-24 lg:py-32 bg-coke-dark relative overflow-hidden noise-overlay section-connector">
+            <div class="absolute top-0 left-1/4 w-96 h-96 bg-coke-red/10 rounded-full blur-[150px] pointer-events-none blob-morph"></div>
+            <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-coke-red/5 rounded-full blur-[150px] pointer-events-none blob-morph" style="animation-delay: -4s;"></div>
+            <div class="max-w-7xl mx-auto px-6 lg:px-10 relative z-10">
+                <div class="mb-16 lg:mb-20 reveal">
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                        <div>
+                            <span class="text-xs font-semibold tracking-[0.3em] text-coke-red uppercase mb-4 block">By The Numbers</span>
+                            <h2 class="font-inter font-black text-4xl sm:text-5xl lg:text-7xl tracking-tighter text-white leading-none shimmer-text">
+                                Every Second<br>Counts
+                            </h2>
+                        </div>
+                        <p class="text-sm lg:text-base text-white/40 max-w-sm font-light leading-relaxed">
+                            The scale of refreshment we deliver to the world, measured in real time.
+                        </p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                    <div class="lg:col-span-2 bg-gradient-to-br from-coke-red/20 to-coke-red/5 rounded-3xl p-8 lg:p-12 border border-coke-red/10 reveal">
+                        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                            <div>
+                                <span class="text-xs font-semibold tracking-widest text-coke-red uppercase mb-3 block">Daily Volume</span>
+                                <div class="flex items-baseline gap-2">
+                                    <span class="font-inter font-black text-6xl sm:text-7xl lg:text-8xl text-white tracking-tighter" id="dailyCounter">1.9</span>
+                                    <span class="font-inter font-bold text-2xl lg:text-3xl text-coke-red">Billion</span>
+                                </div>
+                                <p class="text-sm text-white/40 font-light mt-2">servings consumed every single day worldwide</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-2xl bg-coke-red/20 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-white/30 block">That is</span>
+                                    <span class="text-lg font-bold text-white">21,990</span>
+                                    <span class="text-xs text-white/30">per second</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8 grid grid-cols-3 gap-4">
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-xs text-white/40">Coca-Cola Classic</span>
+                                    <span class="text-xs text-coke-red font-semibold">48%</span>
+                                </div>
+                                <div class="h-1 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full bg-coke-red rounded-full" style="width: 48%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-xs text-white/40">Zero Sugar</span>
+                                    <span class="text-xs text-coke-red font-semibold">28%</span>
+                                </div>
+                                <div class="h-1 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full bg-coke-red rounded-full" style="width: 28%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-xs text-white/40">Other Brands</span>
+                                    <span class="text-xs text-coke-red font-semibold">24%</span>
+                                </div>
+                                <div class="h-1 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full bg-coke-red rounded-full" style="width: 24%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/5 reveal reveal-delay-1">
+                        <div class="w-10 h-10 rounded-xl bg-coke-red/20 flex items-center justify-center mb-4">
+                            <svg class="w-5 h-5 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+                            </svg>
+                        </div>
+                        <span class="font-inter font-black text-3xl lg:text-4xl text-white tracking-tighter">200+</span>
+                        <p class="text-xs text-white/40 mt-1 font-light">Countries & Territories</p>
+                    </div>
+                    <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/5 reveal reveal-delay-2">
+                        <div class="w-10 h-10 rounded-xl bg-coke-red/20 flex items-center justify-center mb-4">
+                            <svg class="w-5 h-5 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                        <span class="font-inter font-black text-3xl lg:text-4xl text-white tracking-tighter">900+</span>
+                        <p class="text-xs text-white/40 mt-1 font-light">Bottling Plants</p>
+                    </div>
+                    <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/5 reveal reveal-delay-3">
+                        <div class="w-10 h-10 rounded-xl bg-coke-red/20 flex items-center justify-center mb-4">
+                            <svg class="w-5 h-5 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-12 0v1z"/>
+                            </svg>
+                        </div>
+                        <span class="font-inter font-black text-3xl lg:text-4xl text-white tracking-tighter">700K+</span>
+                        <p class="text-xs text-white/40 mt-1 font-light">Employees Worldwide</p>
+                    </div>
+                    <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/5 reveal reveal-delay-4">
+                        <div class="w-10 h-10 rounded-xl bg-coke-red/20 flex items-center justify-center mb-4">
+                            <svg class="w-5 h-5 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11"/>
+                            </svg>
+                        </div>
+                        <span class="font-inter font-black text-3xl lg:text-4xl text-white tracking-tighter">500+</span>
+                        <p class="text-xs text-white/40 mt-1 font-light">Brand Portfolio</p>
+                    </div>
+                </div>
+                <div class="mt-8 bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/5 reveal">
+                    <div class="flex items-center gap-4 overflow-hidden">
+                        <span class="text-xs font-semibold text-coke-red uppercase tracking-widest whitespace-nowrap">Live Sales</span>
+                        <div class="h-px flex-1 bg-white/10"></div>
+                        <div class="flex items-center gap-6 text-sm text-white/60 font-light whitespace-nowrap">
+                            <span id="liveCounter">21,990 servings this second</span>
+                            <span class="w-1 h-1 rounded-full bg-coke-red animate-pulse"></span>
+                            <span>1.3M this minute</span>
+                            <span class="w-1 h-1 rounded-full bg-coke-red animate-pulse"></span>
+                            <span>79M this hour</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery section -->
+        <section id="gallery" class="py-24 lg:py-32 bg-coke-cream relative overflow-hidden section-connector">
+            <div class="max-w-7xl mx-auto px-6 lg:px-10">
+                <div class="mb-16 lg:mb-20 reveal">
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                        <div>
+                            <span class="text-xs font-semibold tracking-[0.3em] text-coke-red uppercase mb-4 block" data-i18n="collection">The Collection</span>
+                            <h2 class="font-inter font-black text-4xl sm:text-5xl lg:text-7xl tracking-tighter text-coke-dark leading-none">
+                                <span data-i18n-html="galleryTitle">Our<br>Products</span>
+                            </h2>
+                        </div>
+                        <p class="text-sm lg:text-base text-coke-dark/50 max-w-sm font-light leading-relaxed">
+                            From the iconic contour bottle to our expanding family of brands, every product is crafted with care.
+                        </p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6" id="productPortfolioGrid">
+                    <div class="product-gallery-item group relative bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer reveal">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-gradient-to-b from-red-50 to-white">
+                            <img src="https://kimi-web-img.moonshot.cn/img/www.coca-cola.com/0c3c0f429e7a820d43bfe2bd187fac234194cd59.jpg" alt="Coca-Cola Cherry" class="product-gallery-img w-full h-full object-contain p-4" />
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                            <span class="text-xs font-semibold text-white/60 uppercase tracking-wider">Flavored</span>
+                            <h4 class="font-inter font-bold text-white text-sm mt-0.5">Cherry Coke</h4>
+                        </div>
+                        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="product-gallery-item group relative bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer reveal reveal-delay-1">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-gradient-to-b from-green-50 to-white">
+                            <img src="https://kimi-web-img.moonshot.cn/img/www.coca-cola.com/0ccb899c5220f560dad18c44e35143709ce051f3.jpg" alt="Sprite" class="product-gallery-img w-full h-full object-contain p-4" />
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                            <span class="text-xs font-semibold text-white/60 uppercase tracking-wider">Lemon-Lime</span>
+                            <h4 class="font-inter font-bold text-white text-sm mt-0.5">Sprite</h4>
+                        </div>
+                        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="product-gallery-item group relative bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer reveal reveal-delay-2">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-gradient-to-b from-orange-50 to-white">
+                            <img src="https://kimi-web-img.moonshot.cn/img/www.coca-cola.com/7419f6535145cab92ba6a3c4874f5e48d894ded2.png" alt="Fanta Orange" class="product-gallery-img w-full h-full object-contain p-4" />
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                            <span class="text-xs font-semibold text-white/60 uppercase tracking-wider">Fruit</span>
+                            <h4 class="font-inter font-bold text-white text-sm mt-0.5">Fanta Orange</h4>
+                        </div>
+                        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="product-gallery-item group relative bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer reveal reveal-delay-3">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-gradient-to-b from-blue-50 to-white">
+                            <img src="https://kimi-web-img.moonshot.cn/img/www.coca-cola.com/3cf5d0099259070a3995d80c734adfd5bba31d7b.png" alt="Dasani Water" class="product-gallery-img w-full h-full object-contain p-4" />
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                            <span class="text-xs font-semibold text-white/60 uppercase tracking-wider">Hydration</span>
+                            <h4 class="font-inter font-bold text-white text-sm mt-0.5">Dasani</h4>
+                        </div>
+                        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="product-gallery-item group relative bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer reveal">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-gradient-to-b from-amber-50 to-white">
+                            <img src="https://kimi-web-img.moonshot.cn/img/escpfinancesociety.wordpress.com/b29138311d0708fa0d829b413ae740bb90f90655.jpeg" alt="Costa Coffee" class="product-gallery-img w-full h-full object-contain p-4" />
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                            <span class="text-xs font-semibold text-white/60 uppercase tracking-wider">Coffee</span>
+                            <h4 class="font-inter font-bold text-white text-sm mt-0.5">Costa Coffee</h4>
+                        </div>
+                        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="product-gallery-item group relative bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer reveal reveal-delay-1">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-gradient-to-b from-red-50 to-white">
+                            <img src="https://kimi-web-img.moonshot.cn/img/www.kroger.com/4b0a499b0192a8d74be8c9bfbbf8adf1b8337a52" alt="Cherry Coke 16oz" class="product-gallery-img w-full h-full object-contain p-4" />
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                            <span class="text-xs font-semibold text-white/60 uppercase tracking-wider">Flavored</span>
+                            <h4 class="font-inter font-bold text-white text-sm mt-0.5">Cherry 16oz</h4>
+                        </div>
+                        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="product-gallery-item group relative bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer reveal reveal-delay-2">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-gradient-to-b from-blue-50 to-white">
+                            <img src="https://kimi-web-img.moonshot.cn/img/www.coca-cola.com/29bfac52d068d8b297176285db71fa0cb7c66f16.png" alt="Dasani Bottle" class="product-gallery-img w-full h-full object-contain p-4" />
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                            <span class="text-xs font-semibold text-white/60 uppercase tracking-wider">Hydration</span>
+                            <h4 class="font-inter font-bold text-white text-sm mt-0.5">Dasani Purified</h4>
+                        </div>
+                        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="product-gallery-item group relative bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer reveal reveal-delay-3">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-gradient-to-b from-green-50 to-white">
+                            <img src="https://kimi-web-img.moonshot.cn/img/www.coca-cola.com/f7910e9698c8402f1d1c4dbc90aa5cf1391bb959.png" alt="Sprite Bottle" class="product-gallery-img w-full h-full object-contain p-4" />
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                            <span class="text-xs font-semibold text-white/60 uppercase tracking-wider">Lemon-Lime</span>
+                            <h4 class="font-inter font-bold text-white text-sm mt-0.5">Sprite Bottle</h4>
+                        </div>
+                        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="w-4 h-4 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-12 text-center reveal">
+                    <button class="liquid-btn px-10 py-4 text-sm font-semibold text-coke-red border border-coke-red/30 rounded-full transition-all duration-500 tracking-wide" id="portfolioToggleBtn" type="button">
+                        View Full Product Portfolio
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Product Detail Modal -->
+    <div class="product-modal fixed inset-0 z-[100] flex items-center justify-center bg-coke-dark/70 backdrop-blur-xl px-4 py-6" id="productModal" aria-hidden="true">
+        <div class="absolute inset-0" data-close-product-modal></div>
+        <div class="product-modal-card relative w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl">
+            <button class="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-coke-dark/5 hover:bg-coke-red hover:text-white transition-all flex items-center justify-center" id="productModalClose" type="button" aria-label="Close product details">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <div class="relative min-h-[360px] lg:min-h-[560px] bg-coke-dark overflow-hidden flex items-center justify-center p-10">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(244,0,9,0.25),transparent_55%)]"></div>
+                    <img id="modalProductImage" src="" alt="" class="relative z-10 w-full max-h-[460px] object-contain drop-shadow-2xl" />
+                </div>
+                <div class="p-8 lg:p-12 flex flex-col justify-center">
+                    <span id="modalProductEyebrow" class="text-xs font-black tracking-[0.3em] text-coke-red uppercase mb-4"></span>
+                    <h3 id="modalProductTitle" class="font-inter font-black text-4xl lg:text-6xl tracking-tighter text-coke-dark leading-none mb-5"></h3>
+                    <p id="modalProductDescription" class="text-base text-coke-dark/60 font-light leading-relaxed mb-8"></p>
+
+                    <div class="grid grid-cols-3 gap-3 mb-8" id="modalProductStats"></div>
+
+                    <div class="mb-8">
+                        <h4 class="text-xs font-black tracking-[0.25em] text-coke-dark/40 uppercase mb-3">Available Sizes</h4>
+                        <div class="flex flex-wrap gap-2" id="modalProductSizes"></div>
+                    </div>
+
+                    <button class="px-8 py-4 bg-coke-red text-white font-bold text-sm rounded-full hover:bg-coke-dark transition-all duration-300 w-full sm:w-auto">
+                        Add to Favorites
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-coke-dark pt-20 pb-10 relative overflow-hidden noise-overlay">
+        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-coke-red/30 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
+                <div class="lg:col-span-4">
+                    <div class="flex items-center gap-2 mb-6">
+                        <svg class="w-8 h-8 text-coke-red" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                        </svg>
+                        <span class="font-inter font-bold text-lg tracking-tight text-white">Coca-Cola</span>
+                    </div>
+                    <p class="text-sm text-white/30 font-light leading-relaxed max-w-xs mb-6">
+                        Crafting moments of refreshment and connection since 1886. 
+                        The world's most beloved beverage.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <a href="#" class="magnetic w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-coke-red hover:border-coke-red/50 transition-all duration-300">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        </a>
+                        <a href="#" class="magnetic w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-coke-red hover:border-coke-red/50 transition-all duration-300">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </a>
+                        <a href="#" class="magnetic w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/40 hover:text-coke-red hover:border-coke-red/50 transition-all duration-300">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 lg:col-start-6">
+                    <h4 class="text-xs font-semibold tracking-widest text-white/40 uppercase mb-6">Explore</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#hero" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Our Story</a></li>
+                        <li><a href="#heritage" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Heritage</a></li>
+                        <li><a href="#products" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Products</a></li>
+                        <li><a href="#global" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Global Network</a></li>
+                        <li><a href="#stats" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Impact</a></li>
+                        <li><a href="#gallery" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Gallery</a></li>
+                    </ul>
+                </div>
+                <div class="lg:col-span-2">
+                    <h4 class="text-xs font-semibold tracking-widest text-white/40 uppercase mb-6">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">About Us</a></li>
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Careers</a></li>
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Investors</a></li>
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Press Center</a></li>
+                    </ul>
+                </div>
+                <div class="lg:col-span-2">
+                    <h4 class="text-xs font-semibold tracking-widest text-white/40 uppercase mb-6">Support</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Contact Us</a></li>
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">FAQ</a></li>
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Store Locator</a></li>
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Accessibility</a></li>
+                    </ul>
+                </div>
+                <div class="lg:col-span-2">
+                    <h4 class="text-xs font-semibold tracking-widest text-white/40 uppercase mb-6">Legal</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Privacy Policy</a></li>
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Terms of Use</a></li>
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Cookie Policy</a></li>
+                        <li><a href="#" class="text-sm text-white/50 hover:text-white transition-colors duration-300 font-light">Ad Choices</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-xs text-white/20 font-light">&copy; 2024 The Coca-Cola Company. All rights reserved.</p>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="text-xs text-white/20 hover:text-white/40 transition-colors font-light">Privacy</a>
+                    <a href="#" class="text-xs text-white/20 hover:text-white/40 transition-colors font-light">Terms</a>
+                    <a href="#" class="text-xs text-white/20 hover:text-white/40 transition-colors font-light">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        const translations = {
+            en: {
+                navStory: 'Our Story',
+                navHeritage: 'Heritage',
+                navProducts: 'Products',
+                navGlobal: 'Global',
+                navImpact: 'Impact',
+                navGallery: 'Gallery',
+                findStore: 'Find a Store',
+                experienceIt: 'Experience It',
+                discoverStory: 'Discover Our Story',
+                since1886: 'Since 1886',
+                heritageTitle: 'A Legacy<br>of Moments',
+                collection: 'The Collection',
+                productsTitle: 'Choose Your<br>Chill',
+                original: 'The Original',
+                classic: 'Classic',
+                explore: 'Explore',
+                noCompromise: 'No Compromise',
+                zeroSugar: 'Zero Sugar',
+                lightCrisp: 'Light & Crisp',
+                worldwide: 'Worldwide Operations',
+                globalTitle: 'Global<br>Refreshment<br>Network',
+                galleryTitle: 'Our<br>Products'
+            },
+            es: {
+                navStory: 'Nuestra Historia',
+                navHeritage: 'Herencia',
+                navProducts: 'Productos',
+                navGlobal: 'Global',
+                navImpact: 'Impacto',
+                navGallery: 'Galería',
+                findStore: 'Buscar Tienda',
+                experienceIt: 'Pruébalo',
+                discoverStory: 'Descubre Nuestra Historia',
+                since1886: 'Desde 1886',
+                heritageTitle: 'Un Legado<br>de Momentos',
+                collection: 'La Colección',
+                productsTitle: 'Elige Tu<br>Frescura',
+                original: 'El Original',
+                classic: 'Clásica',
+                explore: 'Explorar',
+                noCompromise: 'Sin Compromisos',
+                zeroSugar: 'Sin Azúcar',
+                lightCrisp: 'Ligera y Fresca',
+                worldwide: 'Operaciones Mundiales',
+                globalTitle: 'Red Global<br>de Refrescamiento',
+                galleryTitle: 'Nuestros<br>Productos'
+            },
+            de: {
+                navStory: 'Unsere Geschichte',
+                navHeritage: 'Tradition',
+                navProducts: 'Produkte',
+                navGlobal: 'Global',
+                navImpact: 'Wirkung',
+                navGallery: 'Galerie',
+                findStore: 'Store Finden',
+                experienceIt: 'Erleben',
+                discoverStory: 'Unsere Geschichte Entdecken',
+                since1886: 'Seit 1886',
+                heritageTitle: 'Ein Vermächtnis<br>aus Momenten',
+                collection: 'Die Kollektion',
+                productsTitle: 'Wähle Deine<br>Erfrischung',
+                original: 'Das Original',
+                classic: 'Klassik',
+                explore: 'Entdecken',
+                noCompromise: 'Keine Kompromisse',
+                zeroSugar: 'Zero Sugar',
+                lightCrisp: 'Leicht & Frisch',
+                worldwide: 'Weltweite Aktivitäten',
+                globalTitle: 'Globales<br>Erfrischungsnetz',
+                galleryTitle: 'Unsere<br>Produkte'
+            },
+            hi: {
+                navStory: 'हमारी कहानी',
+                navHeritage: 'विरासत',
+                navProducts: 'उत्पाद',
+                navGlobal: 'वैश्विक',
+                navImpact: 'प्रभाव',
+                navGallery: 'गैलरी',
+                findStore: 'स्टोर खोजें',
+                experienceIt: 'अनुभव करें',
+                discoverStory: 'हमारी कहानी जानें',
+                since1886: '1886 से',
+                heritageTitle: 'पलों की<br>विरासत',
+                collection: 'कलेक्शन',
+                productsTitle: 'अपनी<br>ठंडक चुनें',
+                original: 'असली स्वाद',
+                classic: 'क्लासिक',
+                explore: 'देखें',
+                noCompromise: 'कोई समझौता नहीं',
+                zeroSugar: 'ज़ीरो शुगर',
+                lightCrisp: 'हल्का और कुरकुरा',
+                worldwide: 'विश्वव्यापी संचालन',
+                globalTitle: 'वैश्विक<br>रिफ्रेशमेंट नेटवर्क',
+                galleryTitle: 'हमारे<br>उत्पाद'
+            }
+        };
+
+        const languageSelect = document.getElementById('languageSelect');
+        const mobileLanguageSelect = document.getElementById('mobileLanguageSelect');
+
+        function applyLanguage(language) {
+            const copy = translations[language] || translations.en;
+            document.documentElement.lang = language;
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (copy[key]) element.textContent = copy[key];
+            });
+            document.querySelectorAll('[data-i18n-html]').forEach(element => {
+                const key = element.getAttribute('data-i18n-html');
+                if (copy[key]) element.innerHTML = copy[key];
+            });
+            if (languageSelect) languageSelect.value = language;
+            if (mobileLanguageSelect) mobileLanguageSelect.value = language;
+            localStorage.setItem('cokeLanguage', language);
+        }
+
+        [languageSelect, mobileLanguageSelect].forEach(select => {
+            if (!select) return;
+            select.addEventListener('change', event => applyLanguage(event.target.value));
+        });
+
+        applyLanguage(localStorage.getItem('cokeLanguage') || 'en');
+
+        const productDetails = {
+            classic: {
+                eyebrow: 'The Original',
+                title: 'Coca-Cola Classic',
+                description: 'The iconic cola taste with bright carbonation, caramel notes, and the unmistakable finish that made Coca-Cola famous.',
+                image: 'https://freepngimg.com/download/cocacola/26-coca-cola-bottle-png-image.png',
+                alt: 'Coca-Cola Classic bottle',
+                stats: [
+                    ['140', 'Calories'],
+                    ['39g', 'Sugar'],
+                    ['34mg', 'Caffeine']
+                ],
+                sizes: ['7.5 fl oz', '12 fl oz', '16.9 fl oz', '20 fl oz', '2 liter']
+            },
+            zero: {
+                eyebrow: 'No Compromise',
+                title: 'Coca-Cola Zero Sugar',
+                description: 'All the Coca-Cola taste you expect with zero sugar and zero calories, made for a crisp, full-flavor refreshment.',
+                image: 'https://freepngimg.com/download/coca_cola/6-coca-cola-zero-bottle-png-image.png',
+                alt: 'Coca-Cola Zero Sugar bottle',
+                stats: [
+                    ['0', 'Calories'],
+                    ['0g', 'Sugar'],
+                    ['34mg', 'Caffeine']
+                ],
+                sizes: ['7.5 fl oz', '12 fl oz', '16.9 fl oz', '20 fl oz', '2 liter']
+            },
+            diet: {
+                eyebrow: 'Light & Crisp',
+                title: 'Diet Coke',
+                description: 'A lighter cola with its own crisp profile, made for fans who want a distinctively different Coca-Cola experience.',
+                image: 'https://www.pngall.com/wp-content/uploads/15/Diet-Coke-PNG-HD-Image.png',
+                alt: 'Diet Coke bottle',
+                stats: [
+                    ['0', 'Calories'],
+                    ['0g', 'Sugar'],
+                    ['46mg', 'Caffeine']
+                ],
+                sizes: ['7.5 fl oz', '12 fl oz', '16.9 fl oz', '20 fl oz']
+            }
+        };
+
+        const productModal = document.getElementById('productModal');
+        const modalProductImage = document.getElementById('modalProductImage');
+        const modalProductEyebrow = document.getElementById('modalProductEyebrow');
+        const modalProductTitle = document.getElementById('modalProductTitle');
+        const modalProductDescription = document.getElementById('modalProductDescription');
+        const modalProductStats = document.getElementById('modalProductStats');
+        const modalProductSizes = document.getElementById('modalProductSizes');
+        const productModalClose = document.getElementById('productModalClose');
+
+        function openProductModal(productKey) {
+            const product = productDetails[productKey];
+            if (!product || !productModal) return;
+
+            modalProductImage.src = product.image;
+            modalProductImage.alt = product.alt;
+            modalProductEyebrow.textContent = product.eyebrow;
+            modalProductTitle.textContent = product.title;
+            modalProductDescription.textContent = product.description;
+            modalProductStats.innerHTML = product.stats.map(([value, label]) => `
+                <div class="rounded-2xl bg-coke-cream p-4 text-center">
+                    <div class="font-inter font-black text-2xl text-coke-red">${value}</div>
+                    <div class="text-[11px] font-bold text-coke-dark/40 uppercase tracking-widest mt-1">${label}</div>
+                </div>
+            `).join('');
+            modalProductSizes.innerHTML = product.sizes.map(size => `
+                <span class="px-4 py-2 rounded-full bg-coke-dark/5 text-sm font-bold text-coke-dark/60">${size}</span>
+            `).join('');
+
+            productModal.classList.add('active');
+            productModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            productModalClose.focus();
+        }
+
+        function closeProductModal() {
+            if (!productModal) return;
+            productModal.classList.remove('active');
+            productModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('[data-product]').forEach(card => {
+            card.addEventListener('click', () => openProductModal(card.dataset.product));
+            card.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openProductModal(card.dataset.product);
+                }
+            });
+        });
+
+        if (productModalClose) productModalClose.addEventListener('click', closeProductModal);
+        document.querySelectorAll('[data-close-product-modal]').forEach(element => {
+            element.addEventListener('click', closeProductModal);
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeProductModal();
+        });
+
+        const productPortfolioGrid = document.getElementById('productPortfolioGrid');
+        const portfolioToggleBtn = document.getElementById('portfolioToggleBtn');
+        let portfolioExpanded = false;
+
+        const extraPortfolioProducts = [
+            {
+                category: 'Infinit Sugar',
+                name: 'Coke Zero Can',
+                image: 'https://www.citypng.com/public/uploads/preview/hd-coca-cola-zero-can-png-735811696436705bkzavruwf9.png',
+                bg: 'from-red-50 to-white'
+            },
+            {
+                category: 'Classic',
+                name: 'Classic Can',
+                image: 'https://www.citypng.com/public/uploads/preview/hd-cold-coca-cola-classic-can-png-704081694866202bqvyqxu4bv.png',
+                bg: 'from-red-50 to-white'
+            },
+            {
+                category: 'Light',
+                name: 'Diet Coke Light',
+                image: 'https://www.citypng.com/public/uploads/preview/hd-coca-cola-diet-light-can-png-735811696436821fwbmcd8jnu.png',
+                bg: 'from-stone-100 to-white'
+            },
+            {
+                category: 'Lemon-Lime',
+                name: 'Sprite Glass',
+                image: 'https://www.citypng.com/public/uploads/preview/hd-cold-sprite-glass-bottle-png-704081694866263cg4fgrmisr.png',
+                bg: 'from-green-50 to-white'
+            },
+            {
+                category: 'Lemon-Lime',
+                name: 'Sprite Bottle',
+                image: 'https://www.citypng.com/public/uploads/preview/hd-sprite-plastic-bottle-png-735811696436801q5jfw1428v.png',
+                bg: 'from-emerald-50 to-white'
+            },
+            {
+                category: 'Party Pack',
+                name: 'Coca-Cola 6 Pack',
+                image: 'https://www.citypng.com/public/uploads/preview/hd-pack-of-6-coca-cola-bottles-png-735811696436885rm8mfwa1tr.png',
+                bg: 'from-red-50 to-white'
+            },
+            {
+                category: 'Fountain',
+                name: 'Coke With Ice',
+                image: 'https://www.citypng.com/public/uploads/preview/hd-coca-cola-cup-ice-png-704081694866190wyavfxkio0.png',
+                bg: 'from-red-50 to-white'
+            },
+            {
+                category: 'Fountain',
+                name: 'Coke Cup',
+                image: 'https://www.citypng.com/public/uploads/preview/hd-coca-cola-disposable-cup-with-lid-and-straw-png-704081694866168o4ar2hxplm.png',
+                bg: 'from-red-50 to-white'
+            }
+        ];
+
+        function portfolioCardTemplate(product, index) {
+            return `
+                <div class="product-gallery-item portfolio-extra portfolio-card-enter group relative bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer" style="transition-delay: ${index * 70}ms">
+                    <div class="aspect-[3/4] relative overflow-hidden bg-gradient-to-b ${product.bg}">
+                        <img src="${product.image}" alt="${product.name}" class="product-gallery-img w-full h-full object-contain p-4" loading="lazy" />
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                        <span class="text-xs font-semibold text-white/60 uppercase tracking-wider">${product.category}</span>
+                        <h4 class="font-inter font-bold text-white text-sm mt-0.5">${product.name}</h4>
+                    </div>
+                    <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-4 h-4 text-coke-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
+                    </div>
+                </div>
+            `;
+        }
+
+        function revealPortfolioCards() {
+            if (!productPortfolioGrid || portfolioExpanded) return;
+            productPortfolioGrid.insertAdjacentHTML('beforeend', extraPortfolioProducts.map(portfolioCardTemplate).join(''));
+            const addedCards = productPortfolioGrid.querySelectorAll('.portfolio-extra.portfolio-card-enter');
+            requestAnimationFrame(() => {
+                addedCards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('active', 'portfolio-flash');
+                    }, index * 80);
+                });
+            });
+            portfolioExpanded = true;
+            portfolioToggleBtn.textContent = 'Show Less Products';
+        }
+
+        function collapsePortfolioCards() {
+            if (!productPortfolioGrid || !portfolioExpanded) return;
+            const addedCards = [...productPortfolioGrid.querySelectorAll('.portfolio-extra')];
+            addedCards.reverse().forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.remove('active');
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(24px) scale(0.94)';
+                }, index * 35);
+            });
+            setTimeout(() => addedCards.forEach(card => card.remove()), addedCards.length * 35 + 350);
+            portfolioExpanded = false;
+            portfolioToggleBtn.textContent = 'View Full Product Portfolio';
+        }
+
+        if (portfolioToggleBtn && productPortfolioGrid) {
+            portfolioToggleBtn.addEventListener('click', () => {
+                if (portfolioExpanded) {
+                    collapsePortfolioCards();
+                } else {
+                    revealPortfolioCards();
+                }
+            });
+        }
+
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > 50) {
+                navbar.querySelector('.backdrop-blur-xl').classList.add('bg-white/90', 'shadow-sm');
+                navbar.querySelector('.backdrop-blur-xl').classList.remove('bg-white/70');
+            } else {
+                navbar.querySelector('.backdrop-blur-xl').classList.remove('bg-white/90', 'shadow-sm');
+                navbar.querySelector('.backdrop-blur-xl').classList.add('bg-white/70');
+            }
+            lastScroll = currentScroll;
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        // Keep the heritage timeline starting cleanly on the first card
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.timeline-scroll').forEach(slider => {
+                slider.scrollLeft = 0;
+            });
+            updateTimelineButtons();
+        });
+
+        const timelineSlider = document.getElementById('timelineSlider');
+        const timelinePrev = document.getElementById('timelinePrev');
+        const timelineNext = document.getElementById('timelineNext');
+
+        function updateTimelineButtons() {
+            if (!timelineSlider || !timelinePrev || !timelineNext) return;
+            const maxScroll = timelineSlider.scrollWidth - timelineSlider.clientWidth;
+            timelinePrev.disabled = timelineSlider.scrollLeft <= 2;
+            timelineNext.disabled = timelineSlider.scrollLeft >= maxScroll - 2;
+        }
+
+        function scrollTimeline(direction) {
+            if (!timelineSlider) return;
+            const card = timelineSlider.querySelector('.timeline-card');
+            const gap = window.innerWidth >= 1024 ? 32 : 24;
+            const distance = card ? card.offsetWidth + gap : 320;
+
+            timelineSlider.scrollBy({
+                left: direction * distance,
+                behavior: 'smooth'
+            });
+        }
+
+        if (timelineSlider && timelinePrev && timelineNext) {
+            timelinePrev.addEventListener('click', () => scrollTimeline(-1));
+            timelineNext.addEventListener('click', () => scrollTimeline(1));
+            timelineSlider.addEventListener('scroll', updateTimelineButtons);
+            window.addEventListener('resize', updateTimelineButtons);
+            updateTimelineButtons();
+        }
+
+        // Canvas bubbles
+        const canvas = document.getElementById('fizzCanvas');
+        const ctx = canvas.getContext('2d');
+        let bubbles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Bubble {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 100;
+                this.size = Math.random() * 3 + 1;
+                this.speed = Math.random() * 1.5 + 0.5;
+                this.opacity = Math.random() * 0.4 + 0.1;
+                this.wobble = Math.random() * Math.PI * 2;
+                this.wobbleSpeed = Math.random() * 0.02 + 0.01;
+            }
+            update() {
+                this.y -= this.speed;
+                this.wobble += this.wobbleSpeed;
+                this.x += Math.sin(this.wobble) * 0.5;
+                if (this.y < -10) this.reset();
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(244, 0, 9, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        for (let i = 0; i < 50; i++) bubbles.push(new Bubble());
+
+        function animateBubbles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            bubbles.forEach(b => { b.update(); b.draw(); });
+            requestAnimationFrame(animateBubbles);
+        }
+        animateBubbles();
+
+        // Custom cursor
+        const cursorDot = document.getElementById('cursorDot');
+        const cursorRing = document.getElementById('cursorRing');
+        let mouseX = 0, mouseY = 0;
+        let ringX = 0, ringY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursorDot.style.left = mouseX - 4 + 'px';
+            cursorDot.style.top = mouseY - 4 + 'px';
+        });
+
+        function animateCursor() {
+            ringX += (mouseX - ringX) * 0.15;
+            ringY += (mouseY - ringY) * 0.15;
+            cursorRing.style.left = ringX - 20 + 'px';
+            cursorRing.style.top = ringY - 20 + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // 3D tilt
+        document.querySelectorAll('[data-tilt]').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            });
+        });
+
+        // Scroll reveal - bidirectional with loop (fade in on scroll down, fade out on scroll up)
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                } else {
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' });
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // Split text reveal - bidirectional based on scroll
+        const heroReal = document.getElementById('heroReal');
+        const heroMagic = document.getElementById('heroMagic');
+        const heroSection = document.getElementById('hero');
+
+        const heroObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    heroReal.classList.add('active');
+                    setTimeout(() => heroMagic.classList.add('active'), 200);
+                } else {
+                    heroReal.classList.remove('active');
+                    heroMagic.classList.remove('active');
+                }
+            });
+        }, { threshold: 0.3 });
+
+        if (heroSection) heroObserver.observe(heroSection);
+
+        // Magnetic
+        document.querySelectorAll('.magnetic').forEach(el => {
+            el.addEventListener('mousemove', (e) => {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                el.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'translate(0, 0)';
+            });
+        });
+
+        // Interactive elements cursor expansion
+        document.querySelectorAll('a, button, .hover-reveal, .timeline-card, .product-gallery-item, .stat-card, .globe-dot').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorRing.style.transform = 'scale(1.5)';
+                cursorRing.style.borderColor = 'rgba(244, 0, 9, 0.8)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorRing.style.transform = 'scale(1)';
+                cursorRing.style.borderColor = 'rgba(244, 0, 9, 0.4)';
+            });
+        });
+
+        // Counter animation
+        function animateCounter() {
+            const counter = document.getElementById('dailyCounter');
+            if (!counter) return;
+            const target = 1.9;
+            let current = 0;
+            const increment = target / 60;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) { current = target; clearInterval(timer); }
+                counter.textContent = current.toFixed(1);
+            }, 16);
+        }
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter();
+                }
+            });
+        }, { threshold: 0.3 });
+        const dailyCounter = document.getElementById('dailyCounter');
+        if (dailyCounter) counterObserver.observe(dailyCounter);
+
+        // Live counter
+        function updateLiveCounter() {
+            const liveCounter = document.getElementById('liveCounter');
+            if (liveCounter) {
+                const now = new Date();
+                const seconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                const servings = (seconds * 21990).toLocaleString();
+                liveCounter.textContent = `${servings} servings today so far`;
+            }
+        }
+        setInterval(updateLiveCounter, 1000);
+        updateLiveCounter();
+
+        // Coordinate-based global map
+        const globalMapEl = document.getElementById('globalMap');
+        if (globalMapEl && window.L) {
+            const globalMap = L.map(globalMapEl, {
+                center: [18, 12],
+                zoom: 2,
+                minZoom: 2,
+                maxZoom: 5,
+                scrollWheelZoom: false,
+                worldCopyJump: true,
+                zoomControl: true
+            });
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(globalMap);
+
+            const markerIcon = L.divIcon({
+                className: '',
+                html: '<div class="global-map-marker"></div>',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8]
+            });
+
+            [
+                { name: 'Atlanta, USA - World HQ', coords: [33.749, -84.388] },
+                { name: 'Madrid, Spain - Europe', coords: [40.4168, -3.7038] },
+                { name: 'Shanghai, China - Asia Pacific', coords: [31.2304, 121.4737] },
+                { name: 'Mexico City - Latin America', coords: [19.4326, -99.1332] },
+                { name: 'Johannesburg, South Africa - Africa', coords: [-26.2041, 28.0473] },
+                { name: 'Sydney, Australia - Oceania', coords: [-33.8688, 151.2093] }
+            ].forEach(location => {
+                L.marker(location.coords, { icon: markerIcon })
+                    .addTo(globalMap)
+                    .bindTooltip(location.name, {
+                        className: 'global-map-tooltip',
+                        direction: 'top',
+                        offset: [0, -12]
+                    });
+            });
+        }
+
+        // Globe dots tooltip
+        document.querySelectorAll('.globe-dot').forEach(dot => {
+            dot.addEventListener('mouseenter', () => {
+                const tooltip = dot.querySelector('.globe-tooltip');
+                if (tooltip) tooltip.style.opacity = '1';
+            });
+            dot.addEventListener('mouseleave', () => {
+                const tooltip = dot.querySelector('.globe-tooltip');
+                if (tooltip) tooltip.style.opacity = '0';
+            });
+        });
+    </script>
+</body>
+
+<!-- =====================================================
+     COCA-COLA API — fully inlined (no external file needed)
+     Fixes: <base target="_blank"> was breaking script src load
+===================================================== -->
+<script>
+class CokeAPI {
+    constructor() {
+        this.baseURL = 'https://api.open-meteo.com/v1';
+    }
+    async getWeather(lat, lon, city = '') {
+        try {
+            const r = await fetch(`${this.baseURL}/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+            if (!r.ok) throw new Error('Weather API error');
+            const d = await r.json();
+            return {
+                temperature: d.current_weather.temperature,
+                windspeed: d.current_weather.windspeed,
+                city: city,
+                timestamp: new Date().toLocaleString()
+            };
+        } catch (e) {
+            console.error('Weather fetch failed:', e.message);
+            return null;
+        }
+    }
+    getRandomFact() {
+        const facts = [
+            'Coca-Cola was invented in 1886 by Dr. John Pemberton.',
+            'The Coca-Cola recipe is kept in a vault in Atlanta, Georgia.',
+            'Coca-Cola is sold in over 200 countries worldwide.',
+            'The original Coca-Cola was sold for 5 cents a glass.',
+            'Coca-Cola uses over 900 bottling plants globally.',
+            'The Coca-Cola logo is recognized by 94% of the world\'s population.',
+            'Coca-Cola was the first soft drink in space (1985).',
+            'The average person consumes about 1 Coca-Cola per week.',
+            'Over 1.9 billion servings of Coca-Cola products are enjoyed each day.',
+            'The name "Coca-Cola" refers to two of its original ingredients: coca leaves and kola nuts.'
+        ];
+        return facts[Math.floor(Math.random() * facts.length)];
+    }
+}
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', async function cokeAPIInit() {
+    const api = new CokeAPI();
+
+    // --------------------------------------------------
+    // CONFIG — locations matching the 6 .stat-cards
+    // --------------------------------------------------
+    const LOCATIONS = [
+        { lat: 33.749,   lon: -84.388,  label: 'Atlanta'       },
+        { lat: 40.4168,  lon: -3.7038,  label: 'Madrid'        },
+        { lat: 31.2304,  lon: 121.4737, label: 'Shanghai'      },
+        { lat: 19.4326,  lon: -99.1332, label: 'Mexico City'   },
+        { lat: -26.2041, lon: 28.0473,  label: 'Johannesburg'  },
+        { lat: -33.8688, lon: 151.2093, label: 'Sydney'        },
+    ];
+
+    // --------------------------------------------------
+    // HELPER — temperature → emoji
+    // --------------------------------------------------
+    function tempEmoji(t) {
+        if (t < 0)  return '🥶';
+        if (t < 10) return '❄️';
+        if (t < 20) return '⛅';
+        if (t < 30) return '🌤️';
+        return '☀️';
+    }
+
+    // --------------------------------------------------
+    // 1. WEATHER BADGES on the 6 global stat-cards
+    // --------------------------------------------------
+    const statCards = document.querySelectorAll('.stat-card');
+    LOCATIONS.forEach((loc, i) => {
+        const card = statCards[i];
+        if (!card) return;
+
+        // Insert a placeholder badge immediately so layout is stable
+        const badge = document.createElement('div');
+        badge.className = 'weather-badge mt-3 inline-flex items-center gap-2 bg-red-50 border border-coke-red/10 px-3 py-1.5 rounded-full';
+        badge.innerHTML = `<span class="text-xs font-semibold text-coke-red/50">⏳ Loading weather…</span>`;
+
+        // Insert after the employee/factory row (last child of card)
+        card.appendChild(badge);
+
+        // Fetch then update
+        api.getWeather(loc.lat, loc.lon, loc.label).then(w => {
+            if (w) {
+                const emoji = tempEmoji(w.temperature);
+                badge.innerHTML = `
+                    <span class="text-xs font-bold text-coke-red">${emoji} ${w.temperature}°C</span>
+                    <span class="text-[10px] text-coke-dark/35">· 💨 ${w.windspeed} km/h</span>
+                `;
+            } else {
+                badge.innerHTML = `<span class="text-xs text-coke-dark/30">🌍 Weather unavailable</span>`;
+            }
+        });
+    });
+
+    // --------------------------------------------------
+    // 2. LIVE WEATHER STRIP — injected below the map cards
+    // --------------------------------------------------
+    const globalSection = document.querySelector('#global');
+    if (globalSection) {
+        const strip = document.createElement('section');
+        strip.id = 'liveWeatherStrip';
+        strip.className = 'py-12 bg-gradient-to-b from-white to-coke-cream';
+        strip.innerHTML = `
+            <div class="max-w-7xl mx-auto px-6 lg:px-10">
+                <div class="text-center mb-8">
+                    <span class="text-xs font-semibold tracking-[0.3em] text-coke-red uppercase">Live from Open-Meteo</span>
+                    <h3 class="font-inter font-black text-2xl lg:text-3xl mt-2 text-coke-dark">
+                        🌍  Weather <span class="text-coke-red">At Our Production Facilities</span>
+                    </h3>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="weatherStripGrid"></div>
+            </div>
+        `;
+        globalSection.after(strip);
+
+        const grid = document.getElementById('weatherStripGrid');
+
+        // Build cards immediately with skeleton state
+        LOCATIONS.forEach(loc => {
+            const cell = document.createElement('div');
+            cell.id = `ws-${loc.label.replace(/\s+/g, '-')}`;
+            cell.className = 'bg-white rounded-2xl p-4 text-center border border-coke-red/5 shadow-sm hover:shadow-md transition-shadow';
+            cell.innerHTML = `
+                <div class="text-lg font-black text-coke-dark/20 mb-1">—°C</div>
+                <div class="text-[11px] font-semibold text-coke-dark/50">${loc.label}</div>
+                <div class="text-[10px] text-coke-dark/30 mt-0.5">loading…</div>
+            `;
+            grid.appendChild(cell);
+
+            api.getWeather(loc.lat, loc.lon, loc.label).then(w => {
+                if (w) {
+                    const emoji = tempEmoji(w.temperature);
+                    cell.innerHTML = `
+                        <div class="text-2xl mb-0.5">${emoji}</div>
+                        <div class="text-lg font-black text-coke-red">${w.temperature}°C</div>
+                        <div class="text-[11px] font-semibold text-coke-dark/60">${loc.label}</div>
+                        <div class="text-[10px] text-coke-dark/30 mt-0.5">💨 ${w.windspeed} km/h</div>
+                    `;
+                } else {
+                    cell.innerHTML = `
+                        <div class="text-xl mb-1">🌍</div>
+                        <div class="text-[11px] font-semibold text-coke-dark/50">${loc.label}</div>
+                        <div class="text-[10px] text-coke-dark/30 mt-0.5">unavailable</div>
+                    `;
+                }
+            });
+        });
+    }
+
+    // --------------------------------------------------
+    // 3. WEATHER POPUPS on the existing Leaflet map
+    //    (patches the already-initialised map via its
+    //     existing markers — no double-init)
+    // --------------------------------------------------
+    function patchMapMarkers() {
+        if (!window.L) return;
+
+        // The map is already created in the inline script above.
+        // We need to find the map instance attached to the element.
+        const mapEl = document.getElementById('globalMap');
+        if (!mapEl || !mapEl._leaflet_id) return; // not yet ready
+
+        // Grab the Leaflet map instance from the element
+        const mapInstance = window.L.map && mapEl._leaflet_map
+            ? mapEl._leaflet_map
+            : null;
+
+        // If we can't grab the instance (private API), we just re-bind
+        // tooltips on the markers that exist.  The simplest approach:
+        // remove old markers and re-add with weather data.
+        // We'll do this by listening for weather results and building
+        // weather-enriched tooltips via a shared L.layerGroup.
+        const mapObj = Object.values(window).find(
+            v => v && v._leaflet_id && v.getZoom && v.getCenter
+        );
+        if (!mapObj) return;
+
+        // Clear old plain markers and replace with weather-enriched ones
+        const markerIcon = L.divIcon({
+            className: '',
+            html: '<div class="global-map-marker"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        const markerDefs = [
+            { name: 'Atlanta, USA — World HQ',        coords: [33.749,   -84.388],  loc: LOCATIONS[0] },
+            { name: 'Madrid, Spain — Europe',          coords: [40.4168,  -3.7038],  loc: LOCATIONS[1] },
+            { name: 'Shanghai, China — Asia Pacific',  coords: [31.2304,  121.4737], loc: LOCATIONS[2] },
+            { name: 'Mexico City — Latin America',     coords: [19.4326,  -99.1332], loc: LOCATIONS[3] },
+            { name: 'Johannesburg, SA — Africa',       coords: [-26.2041, 28.0473],  loc: LOCATIONS[4] },
+            { name: 'Sydney, Australia — Oceania',     coords: [-33.8688, 151.2093], loc: LOCATIONS[5] },
+        ];
+
+        // Remove every existing layer that is a marker
+        mapObj.eachLayer(layer => {
+            if (layer instanceof L.Marker) mapObj.removeLayer(layer);
+        });
+
+        markerDefs.forEach(def => {
+            const marker = L.marker(def.coords, { icon: markerIcon }).addTo(mapObj);
+            // Start with plain tooltip
+            marker.bindTooltip(def.name, {
+                className: 'global-map-tooltip',
+                direction: 'top',
+                offset: [0, -12]
+            });
+
+            // Enrich with weather async
+            api.getWeather(def.loc.lat, def.loc.lon, def.loc.label).then(w => {
+                if (w) {
+                    const emoji = tempEmoji(w.temperature);
+                    marker.setTooltipContent(
+                        `<b>${def.name}</b><br>${emoji} ${w.temperature}°C &nbsp;💨 ${w.windspeed} km/h`
+                    );
+                }
+            });
+        });
+    }
+
+    // The inline map script runs during DOMContentLoaded, same timing as us.
+    // Wait one tick so it finishes first.
+    setTimeout(patchMapMarkers, 800);
+
+    // --------------------------------------------------
+    // 4. DAILY FACT TICKER — rotating Coca-Cola facts
+    //    Injected into the hero section kicker line
+    // --------------------------------------------------
+    const heroKicker = document.querySelector('#hero [data-i18n="navStory"]');
+    const factTarget = document.querySelector('#hero .font-light');
+    if (factTarget) {
+        const facts = [
+            api.getRandomFact(),
+            api.getRandomFact(),
+            api.getRandomFact(),
+        ];
+        // Filter to unique
+        const uniqueFacts = [...new Set(facts)];
+        let fi = 0;
+
+        const factBadge = document.createElement('div');
+        factBadge.className = 'mt-6 inline-flex items-start gap-2 bg-white/60 backdrop-blur-sm border border-coke-red/10 px-4 py-3 rounded-2xl max-w-sm text-left';
+        factBadge.innerHTML = `
+            <span class="text-coke-red text-sm mt-0.5">💡</span>
+            <span id="factText" class="text-xs text-coke-dark/60 font-light leading-relaxed">${uniqueFacts[0]}</span>
+        `;
+        factTarget.after(factBadge);
+
+        if (uniqueFacts.length > 1) {
+            setInterval(() => {
+                fi = (fi + 1) % uniqueFacts.length;
+                const el = document.getElementById('factText');
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.transition = 'opacity 0.4s ease';
+                    setTimeout(() => {
+                        el.textContent = uniqueFacts[fi];
+                        el.style.opacity = '1';
+                    }, 400);
+                }
+            }, 6000);
+        }
+    }
+
+    // --------------------------------------------------
+    // 5. FOOTER WEATHER WIDGET (replaces old broken one)
+    // --------------------------------------------------
+    const footer = document.querySelector('footer');
+    if (footer) {
+        const weatherDiv = document.createElement('div');
+        weatherDiv.className = 'mt-6 flex flex-wrap gap-4 text-xs text-white/30';
+        weatherDiv.id = 'weatherWidget';
+        weatherDiv.innerHTML = LOCATIONS.map(l =>
+            `<span id="fw-${l.label.replace(/\s+/g, '-')}">⏳ ${l.label}</span>`
+        ).join('');
+
+        const borderEl = footer.querySelector('.border-t');
+        if (borderEl) borderEl.before(weatherDiv);
+        else footer.prepend(weatherDiv);
+
+        // Populate
+        LOCATIONS.forEach(loc => {
+            api.getWeather(loc.lat, loc.lon, loc.label).then(w => {
+                const el = document.getElementById(`fw-${loc.label.replace(/\s+/g, '-')}`);
+                if (!el) return;
+                if (w) {
+                    el.textContent = `${tempEmoji(w.temperature)} ${loc.label}: ${w.temperature}°C`;
+                } else {
+                    el.textContent = `🌍 ${loc.label}: —`;
+                }
+            });
+        });
+    }
+
+    console.log('✅ Coca-Cola API: all features initialised');
+});
+</script>
+</html>
