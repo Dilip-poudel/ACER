@@ -2009,4 +2009,576 @@ document.addEventListener('DOMContentLoaded', async function cokeAPIInit() {
     console.log('✅ Coca-Cola API: all features initialised');
 });
 </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coca-Cola | Real Magic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'coke-red': '#F40009',
+                        'coke-dark': '#111111',
+                        'coke-cream': '#F5F3EF',
+                        'coke-charcoal': '#1A1A1A',
+                    },
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .timeline-scroll::-webkit-scrollbar { height: 3px; }
+        .timeline-scroll::-webkit-scrollbar-track { background: transparent; }
+        .timeline-scroll::-webkit-scrollbar-thumb { background: #F40009; border-radius: 10px; }
+        .gradient-mesh {
+            background: radial-gradient(ellipse at 20% 50%, rgba(244,0,9,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 30%, rgba(244,0,9,0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255,255,255,0.6) 0%, transparent 50%),
+                linear-gradient(135deg, #F5F3EF 0%, #FAFAFA 50%, #F0EDE8 100%);
+        }
+        .product-panel { transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-panel:hover { flex: 1.5; }
+        .product-panel:hover .product-image { transform: scale(1.08) translateY(-12px); }
+        .product-panel:hover .product-bg { opacity: 1; }
+        .product-shot { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 28px 44px rgba(0,0,0,0.6)); }
+        .product-shot-original { object-position: 50% 50%; }
+        .product-shot-zero { object-position: 50% 50%; }
+        .product-shot-diet { object-position: 50% 50%; }
+        .timeline-scroll { scroll-snap-type: x mandatory; scroll-padding-left: 0.25rem; scroll-behavior: smooth; }
+        .timeline-card { transition: all 0.4s ease; scroll-snap-align: start; }
+        .timeline-card:hover { transform: translateY(-8px); }
+        .timeline-card:hover .timeline-img { transform: scale(1.05); }
+        .heritage-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), filter 0.8s ease; }
+        .timeline-card:hover .heritage-photo, .timeline-card:focus-within .heritage-photo { transform: scale(1.12); filter: saturate(1.08) contrast(1.05); }
+        .heritage-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0.28) 45%, rgba(0,0,0,0.05)); }
+        .heritage-reveal { transform: translateY(62px); opacity: 0.08; transition: transform 0.45s ease, opacity 0.45s ease; }
+        .timeline-card:hover .heritage-reveal, .timeline-card:focus-within .heritage-reveal { transform: translateY(0); opacity: 1; }
+        .timeline-nav-btn { width: 44px; height: 44px; border-radius: 9999px; border: 1px solid rgba(244,0,9,0.2); background: rgba(255,255,255,0.9); color: #F40009; display: inline-flex; align-items: center; justify-content: center; transition: all 0.25s ease; box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
+        .timeline-nav-btn:hover { background: #ed252c; color: white; transform: translateY(-2px); box-shadow: 0 16px 36px rgba(244,0,9,0.22); }
+        .timeline-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; background: rgba(255,255,255,0.7); color: rgba(26,26,26,0.35); }
+        .hero-text-layer { text-shadow: 0 4px 30px rgba(0,0,0,0.1); }
+        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(1deg); } }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        @keyframes subtlePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(244,0,9,0.2); } 50% { box-shadow: 0 0 0 8px rgba(244,0,9,0); } }
+        .pulse-cta { animation: subtlePulse 3s ease-in-out infinite; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        #fizzCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-track { animation: marquee 20s linear infinite; }
+        .marquee-track:hover { animation-play-state: paused; }
+        .tilt-card { transform-style: preserve-3d; transition: transform 0.1s ease-out; }
+        .tilt-card .tilt-content { transform: translateZ(40px); }
+        .reveal { opacity: 0; transform: translateY(60px); transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal.reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal.reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal.reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal.reveal-delay-4 { transition-delay: 0.4s; }
+        .reveal.reveal-delay-5 { transition-delay: 0.5s; }
+        .reveal:not(.active) { transition-delay: 0s !important; }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+        .reveal-delay-5 { transition-delay: 0.5s; }
+        @keyframes blobMorph { 0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; } 50% { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; } 75% { border-radius: 60% 40% 60% 30% / 70% 30% 50% 60%; } }
+        .blob-morph { animation: blobMorph 8s ease-in-out infinite; }
+        .liquid-btn { position: relative; overflow: hidden; z-index: 1; }
+        .liquid-btn::before { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: #F40009; transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: -1; border-radius: 50% 50% 0 0; }
+        .liquid-btn:hover::before { height: 180%; border-radius: 0; }
+        .liquid-btn:hover { color: white; }
+        .cursor-dot { width: 8px; height: 8px; background: #F40009; border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: transform 0.1s ease; mix-blend-mode: difference; }
+        .cursor-ring { width: 40px; height: 40px; border: 1px solid rgba(244,0,9,0.4); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transition: all 0.15s ease-out; }
+        .noise-overlay { position: relative; }
+        .noise-overlay::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.03; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); }
+        .magnetic { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+        .shimmer-text { background: linear-gradient(90deg, #ffffff 0%, #F40009 25%, #ffffff 50%, #F40009 75%, #ffffff 100%); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 4s linear infinite; }
+        .split-reveal { overflow: hidden; }
+        .split-reveal span { display: inline-block; transform: translateY(100%); transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .split-reveal.active span { transform: translateY(0); }
+        @keyframes pulse-ring { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; } 100% { transform: translate(-50%, -50%) scale(3); opacity: 0; } }
+        .product-gallery-item { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-gallery-item:hover { transform: translateY(-12px) scale(1.02); }
+        .product-gallery-item:hover .product-gallery-img { transform: scale(1.1); }
+        .product-gallery-img { transition: transform 0.6s ease; }
+        .portfolio-card-enter { opacity: 0; transform: translateY(34px) scale(0.92) rotate(1deg); filter: blur(10px); }
+        .portfolio-card-enter.active { opacity: 1; transform: translateY(0) scale(1) rotate(0); filter: blur(0); transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1), filter 0.65s ease; }
+        .portfolio-flash { animation: portfolioFlash 0.8s ease; }
+        @keyframes portfolioFlash { 0% { box-shadow: 0 0 0 0 rgba(244,0,9,0.0); } 45% { box-shadow: 0 0 0 10px rgba(244,0,9,0.12); } 100% { box-shadow: 0 0 0 0 rgba(244,0,9,0); } }
+        .section-connector { position: relative; }
+        .section-connector::before { content: ''; position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 1px; height: 80px; background: linear-gradient(to bottom, transparent, #F40009, transparent); }
+        .stat-card { background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%); border: 1px solid rgba(244,0,9,0.1); transition: all 0.4s ease; }
+        .stat-card:hover { border-color: rgba(244,0,9,0.3); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+        .globe-dot { position: absolute; width: 14px; height: 14px; background: #F40009; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 0 0 rgba(244,0,9,0.4); border: 2px solid white; transform: translate(-50%, -50%); }
+        .globe-dot:hover { transform: translate(-50%, -50%) scale(1.6); box-shadow: 0 0 0 10px rgba(244,0,9,0.15); }
+        .globe-tooltip { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.3s ease; font-size: 13px; font-weight: 600; }
+        .globe-dot:hover .globe-tooltip { opacity: 1; bottom: 24px; }
+        #globalMap { height: clamp(360px, 48vw, 560px); width: 100%; background: #F5F3EF; z-index: 1; }
+        #globalMap .leaflet-control-attribution { font-size: 10px; color: rgba(26,26,26,0.45); background: rgba(245,243,239,0.8); }
+        #globalMap .leaflet-control-zoom { border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        #globalMap .leaflet-control-zoom a { color: #1A1A1A; border-color: rgba(26,26,26,0.08); }
+        .global-map-marker { width: 16px; height: 16px; border-radius: 50%; background: #F40009; border: 3px solid white; box-shadow: 0 8px 20px rgba(244,0,9,0.35), 0 0 0 8px rgba(244,0,9,0.12); }
+        .global-map-tooltip { border: 0; border-radius: 12px; padding: 10px 14px; color: #1A1A1A; box-shadow: 0 10px 30px rgba(0,0,0,0.14); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; }
+        .language-select { border: 1px solid rgba(244,0,9,0.25); border-radius: 9999px; background: rgba(255,255,255,0.85); color: #1A1A1A; font-size: 12px; font-weight: 700; padding: 9px 32px 9px 14px; outline: none; cursor: pointer; transition: all 0.25s ease; }
+        .language-select:hover, .language-select:focus { border-color: rgba(244,0,9,0.65); box-shadow: 0 10px 24px rgba(244,0,9,0.12); }
+        .product-modal { opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .product-modal.active { opacity: 1; pointer-events: auto; }
+        .product-modal-card { transform: translateY(24px) scale(0.98); transition: transform 0.25s ease; }
+        .product-modal.active .product-modal-card { transform: translateY(0) scale(1); }
+
+        /* ===== STORE LOCATOR MODAL STYLES ===== */
+        .store-modal { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .store-modal.active { opacity: 1; pointer-events: auto; }
+        .store-modal-card { transform: translateY(32px) scale(0.97); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+        .store-modal.active .store-modal-card { transform: translateY(0) scale(1); }
+        #storeMap { height: 360px; width: 100%; background: #F5F3EF; border-radius: 16px; overflow: hidden; }
+        .store-list-item { transition: background 0.2s ease, border-color 0.2s ease; cursor: pointer; }
+        .store-list-item:hover { background: #FFF0F0; border-color: rgba(244,0,9,0.3); }
+        .store-list-item.active-store { background: #FFF0F0; border-color: #F40009; }
+        .store-map-marker { width: 22px; height: 22px; border-radius: 50%; background: #F40009; border: 3px solid white; box-shadow: 0 4px 14px rgba(244,0,9,0.45), 0 0 0 6px rgba(244,0,9,0.12); }
+        .store-map-popup .leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 12px 36px rgba(0,0,0,0.14); border: none; padding: 0; }
+        .store-map-popup .leaflet-popup-content { margin: 0; }
+        .store-map-popup .leaflet-popup-tip-container { display: none; }
+        .store-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+        .store-rating { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; color: #F40009; }
+        #storeSearchInput { border: 1px solid rgba(244,0,9,0.2); border-radius: 999px; padding: 10px 18px 10px 42px; font-size: 13px; font-family: 'Inter', sans-serif; width: 100%; outline: none; background: #fff; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        #storeSearchInput:focus { border-color: #F40009; box-shadow: 0 0 0 3px rgba(244,0,9,0.1); }
+        .filter-chip { border: 1px solid rgba(244,0,9,0.2); border-radius: 999px; padding: 5px 14px; font-size: 11px; font-weight: 700; color: rgba(26,26,26,0.6); cursor: pointer; transition: all 0.2s ease; letter-spacing: 0.03em; background: white; }
+        .filter-chip:hover, .filter-chip.active { background: #F40009; color: white; border-color: #F40009; }
+    </style>
+<base target="_blank">
+</head>
+<body class="bg-coke-cream text-coke-dark antialiased">
+
+    <!-- ====== YOUR EXISTING HTML CONTENT GOES HERE ====== -->
+    <!-- (All your existing sections: Navigation, Hero, Products, etc.) -->
+    <!-- For brevity, I'm showing only the NEW modal and script -->
+    <!-- Keep ALL your existing HTML content above this line -->
+
+    <!-- ====== STORE LOCATOR MODAL ====== -->
+    <div class="store-modal fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-coke-dark/60 backdrop-blur-xl px-0 sm:px-4 py-0 sm:py-6" id="storeModal" aria-hidden="true" aria-modal="true" role="dialog" aria-label="Find a Coca-Cola store in Pokhara">
+      <div class="absolute inset-0" id="storeModalOverlay"></div>
+      <div class="store-modal-card relative w-full sm:max-w-5xl max-h-[95vh] sm:max-h-[88vh] flex flex-col bg-white sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 flex-shrink-0">
+          <div>
+            <div class="flex items-center gap-2 mb-0.5">
+              <svg class="w-5 h-5 text-coke-red" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              <h2 class="font-inter font-black text-xl tracking-tight text-coke-dark">Find a Store — Pokhara</h2>
+            </div>
+            <p class="text-xs text-coke-dark/40 font-light">Major stores stocking Coca-Cola products near you</p>
+          </div>
+          <button id="storeModalClose" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-coke-red hover:text-white transition-all flex items-center justify-center text-gray-500" aria-label="Close store locator">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Search + Filters -->
+        <div class="px-6 py-3 flex-shrink-0 border-b border-gray-100 bg-white">
+          <div class="relative mb-3">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-coke-red/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" id="storeSearchInput" placeholder="Search stores in Pokhara…" aria-label="Search stores" />
+          </div>
+          <div class="flex gap-2 flex-wrap">
+            <button class="filter-chip active" data-filter="all">All Stores</button>
+            <button class="filter-chip" data-filter="supermarket">Supermarket</button>
+            <button class="filter-chip" data-filter="department">Department</button>
+            <button class="filter-chip" data-filter="convenience">Convenience</button>
+            <button class="filter-chip" data-filter="open">Open Now</button>
+          </div>
+        </div>
+
+        <!-- Body: Map + List -->
+        <div class="flex flex-col lg:flex-row flex-1 overflow-hidden min-h-0">
+
+          <!-- Map -->
+          <div class="flex-shrink-0 lg:w-[58%] p-4 pb-2 lg:pb-4 lg:pr-2">
+            <div id="storeMap" class="rounded-2xl overflow-hidden border border-gray-100"></div>
+            <p class="text-[11px] text-coke-dark/30 text-center mt-2">Click a pin or store to highlight · Data via OpenStreetMap</p>
+          </div>
+
+          <!-- Store List -->
+          <div class="flex-1 overflow-y-auto p-4 pt-2 lg:pt-4 lg:pl-2 space-y-2" id="storeList" role="list" aria-label="Store list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0 bg-gray-50/60">
+          <span class="text-xs text-coke-dark/40" id="storeCount">8 stores found in Pokhara</span>
+          <span class="text-xs text-coke-red font-semibold">🟢 Coca-Cola stocked at all locations</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-coke-dark pt-20 pb-10 relative overflow-hidden noise-overlay">
+        <!-- Your existing footer -->
+    </footer>
+
+    <!-- ====== JAVASCRIPT ====== -->
+    <script>
+        // ====== YOUR EXISTING JAVASCRIPT GOES HERE ======
+        // (All your existing JS: mobile menu, translations, product modal, map, etc.)
+
+        // ====== STORE LOCATOR SCRIPT ======
+        (function() {
+          const STORES = [
+            {
+              id: 1,
+              name: "Bhat-Bhateni Supermarket",
+              address: "New Road, Pokhara 33700",
+              lat: 28.2203,
+              lng: 83.9864,
+              rating: 4.0,
+              reviews: 3583,
+              hours: "8:00 AM – 8:30 PM",
+              phone: "+977 980-2305846",
+              type: "supermarket",
+              tags: ["Supermarket", "Best Seller"],
+              note: "Largest supermarket in Pokhara. Full Coca-Cola range including Zero Sugar & Diet.",
+              badge: "Most Popular",
+              isOpen: true
+            },
+            {
+              id: 2,
+              name: "Next Shopping Center",
+              address: "Sabhagriha Chowk-8, Pokhara",
+              lat: 28.2103,
+              lng: 83.9837,
+              rating: 3.8,
+              reviews: 187,
+              hours: "8:00 AM – 8:00 PM",
+              phone: "+977 61-531182",
+              type: "department",
+              tags: ["Departmental"],
+              note: "Wide grocery range. Coca-Cola, Sprite, Fanta all available.",
+              badge: null,
+              isOpen: true
+            },
+            {
+              id: 3,
+              name: "Sulav Departmental Store",
+              address: "Chipledhunga, Pokhara",
+              lat: 28.2112,
+              lng: 83.9646,
+              rating: 4.3,
+              reviews: 141,
+              hours: "8:00 AM – 9:00 PM (Sat)",
+              phone: "+977 985-6075008",
+              type: "department",
+              tags: ["Departmental", "Expat Friendly"],
+              note: "Western-style store. Fixed prices, no overcharging. Full beverage section.",
+              badge: "Expat Pick",
+              isOpen: true
+            },
+            {
+              id: 4,
+              name: "Best Buy Departmental Stores",
+              address: "Sirjana Chowk, Pokhara",
+              lat: 28.2105,
+              lng: 83.9806,
+              rating: 4.6,
+              reviews: 25,
+              hours: "7:00 AM – 9:00 PM",
+              phone: "+977 61-521001",
+              type: "department",
+              tags: ["Departmental", "Early Open"],
+              note: "Opens at 7 AM. Spacious, neat. Good Coca-Cola & Sprite stock.",
+              badge: "Highly Rated",
+              isOpen: true
+            },
+            {
+              id: 5,
+              name: "Binayek Supermart",
+              address: "New Road Area, Pokhara",
+              lat: 28.2240,
+              lng: 83.9883,
+              rating: 4.0,
+              reviews: 43,
+              hours: "8:00 AM – 8:00 PM",
+              phone: "+977 61-570149",
+              type: "supermarket",
+              tags: ["Supermarket", "Historic"],
+              note: "One of the oldest stores in Pokhara. Reliable Coke stock.",
+              badge: null,
+              isOpen: true
+            },
+            {
+              id: 6,
+              name: "Urban Mart",
+              address: "Ram Bazaar, Pokhara",
+              lat: 28.2013,
+              lng: 83.9944,
+              rating: 4.1,
+              reviews: 53,
+              hours: "6:00 AM – 10:00 PM",
+              phone: "+977 982-9717177",
+              type: "supermarket",
+              tags: ["Supermarket", "Long Hours"],
+              note: "Open from 6 AM. Spacious parking. Loyalty program. Cold beverages section.",
+              badge: "Long Hours",
+              isOpen: true
+            },
+            {
+              id: 7,
+              name: "99 Shopping Pokhara",
+              address: "Sabhagriha Chowk, Pokhara",
+              lat: 28.2107,
+              lng: 83.9837,
+              rating: 4.9,
+              reviews: 14,
+              hours: "9:00 AM – 8:00 PM",
+              phone: "+977 984-6175908",
+              type: "supermarket",
+              tags: ["Supermarket", "Budget"],
+              note: "Budget-friendly prices. Great value for Coca-Cola multipacks.",
+              badge: "Best Value",
+              isOpen: true
+            },
+            {
+              id: 8,
+              name: "MIN Mart Shantinagar",
+              address: "Shantinagar Chowk, Pokhara",
+              lat: 28.2139,
+              lng: 83.9710,
+              rating: 4.1,
+              reviews: 55,
+              hours: "6:00 AM – 1:00 AM",
+              phone: "+977 980-2856170",
+              type: "convenience",
+              tags: ["Convenience", "Late Night"],
+              note: "Open until 1 AM! Best for late-night Coke runs. Self-serve coffee too.",
+              badge: "Open Late",
+              isOpen: true
+            }
+          ];
+
+          let filteredStores = [...STORES];
+          let activeStoreId = null;
+          let mapMarkers = {};
+          let storeMap = null;
+
+          const storeModal = document.getElementById('storeModal');
+          const storeModalClose = document.getElementById('storeModalClose');
+          const storeModalOverlay = document.getElementById('storeModalOverlay');
+          const storeList = document.getElementById('storeList');
+          const storeCount = document.getElementById('storeCount');
+          const storeSearchInput = document.getElementById('storeSearchInput');
+
+          function openStoreModal() {
+            storeModal.classList.add('active');
+            storeModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+              initStoreMap();
+              renderStoreList(STORES);
+            }, 100);
+          }
+
+          function closeStoreModal() {
+            storeModal.classList.remove('active');
+            storeModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+          }
+
+          storeModalClose.addEventListener('click', closeStoreModal);
+          storeModalOverlay.addEventListener('click', closeStoreModal);
+          document.addEventListener('keydown', e => { if (e.key === 'Escape') closeStoreModal(); });
+
+          // Attach to ALL "Find a Store" buttons
+          document.querySelectorAll('button, .liquid-btn').forEach(btn => {
+            const span = btn.querySelector('[data-i18n="findStore"]') || btn;
+            const text = (span.textContent || '').trim().toLowerCase();
+            if (text.includes('find') && text.includes('store')) {
+              btn.addEventListener('click', e => {
+                e.preventDefault();
+                openStoreModal();
+              });
+            }
+          });
+
+          function getBadgeStyle(badge) {
+            if (!badge) return '';
+            const styles = {
+              'Most Popular': 'background:#FFF0F0;color:#C80008;',
+              'Best Value': 'background:#F0FFF4;color:#16632E;',
+              'Highly Rated': 'background:#FFF8E7;color:#92600A;',
+              'Open Late': 'background:#F0F4FF;color:#1E3A8A;',
+              'Long Hours': 'background:#F0F4FF;color:#1E3A8A;',
+              'Expat Pick': 'background:#F5F0FF;color:#5B21B6;'
+            };
+            return styles[badge] || 'background:#F5F5F5;color:#555;';
+          }
+
+          function getTagStyle(tag) {
+            const map = {
+              'Supermarket': 'background:#FFF0F0;color:#C80008;',
+              'Departmental': 'background:#FFF8E7;color:#92600A;',
+              'Convenience': 'background:#F0F4FF;color:#1E3A8A;',
+              'Budget': 'background:#F0FFF4;color:#16632E;',
+              'Late Night': 'background:#1A1A2E;color:#818CF8;',
+              'Best Seller': 'background:#FFF0F0;color:#C80008;',
+              'Long Hours': 'background:#F0F4FF;color:#1E3A8A;',
+              'Expat Friendly': 'background:#F5F0FF;color:#5B21B6;',
+              'Early Open': 'background:#ECFDF5;color:#065F46;',
+              'Historic': 'background:#FFF7ED;color:#9A3412;'
+            };
+            return map[tag] || 'background:#F5F5F5;color:#555;';
+          }
+
+          function renderStoreList(stores) {
+            storeCount.textContent = `${stores.length} store${stores.length !== 1 ? 's' : ''} found in Pokhara`;
+            if (!stores.length) {
+              storeList.innerHTML = `<div class="text-center py-12 text-coke-dark/40"><svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg><p class="text-sm font-medium">No stores found</p><p class="text-xs mt-1">Try a different search term</p></div>`;
+              return;
+            }
+            storeList.innerHTML = stores.map(s => `
+              <div class="store-list-item border border-gray-100 rounded-2xl p-4 ${activeStoreId === s.id ? 'active-store' : ''}" data-store-id="${s.id}" role="listitem" tabindex="0" aria-label="${s.name}">
+                <div class="flex items-start justify-between gap-3 mb-2">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                      <h3 class="font-inter font-bold text-sm text-coke-dark truncate">${s.name}</h3>
+                      ${s.badge ? `<span class="store-tag text-[10px] font-black" style="${getBadgeStyle(s.badge)}">${s.badge}</span>` : ''}
+                    </div>
+                    <p class="text-xs text-coke-dark/45 font-light truncate">${s.address}</p>
+                  </div>
+                  <div class="flex-shrink-0 text-right">
+                    ${s.rating ? `<div class="store-rating">★ ${s.rating}<span class="text-coke-dark/30 font-normal ml-1">(${s.reviews.toLocaleString()})</span></div>` : ''}
+                    <div class="text-[10px] text-green-600 font-semibold mt-0.5">● Open</div>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-1 mb-2">
+                  ${s.tags.map(t => `<span class="store-tag" style="${getTagStyle(t)}">${t}</span>`).join('')}
+                </div>
+                <p class="text-xs text-coke-dark/50 font-light mb-2 leading-relaxed">${s.note}</p>
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] text-coke-dark/35">⏰ ${s.hours}</span>
+                  <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name + ' Pokhara Nepal')}" class="text-[11px] font-semibold text-coke-red hover:underline" target="_blank" rel="noopener">Get Directions ↗</a>
+                </div>
+              </div>
+            `).join('');
+
+            storeList.querySelectorAll('.store-list-item').forEach(el => {
+              el.addEventListener('click', () => selectStore(parseInt(el.dataset.storeId)));
+              el.addEventListener('keydown', e => { if (e.key === 'Enter') selectStore(parseInt(el.dataset.storeId)); });
+            });
+          }
+
+          function selectStore(id) {
+            activeStoreId = id;
+            const store = STORES.find(s => s.id === id);
+            if (!store || !storeMap) return;
+            storeMap.setView([store.lat, store.lng], 15, { animate: true });
+            if (mapMarkers[id]) mapMarkers[id].openPopup();
+            renderStoreList(filteredStores);
+            const el = storeList.querySelector(`[data-store-id="${id}"]`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+
+          function initStoreMap() {
+            if (storeMap) return;
+            const mapEl = document.getElementById('storeMap');
+            if (!mapEl || !window.L) return;
+
+            storeMap = L.map(mapEl, {
+              center: [28.2096, 83.9856],
+              zoom: 13,
+              scrollWheelZoom: true,
+              zoomControl: true
+            });
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+              attribution: '&copy; OpenStreetMap &copy; CARTO',
+              subdomains: 'abcd',
+              maxZoom: 20
+            }).addTo(storeMap);
+
+            const markerIcon = L.divIcon({
+              className: '',
+              html: '<div class="store-map-marker"></div>',
+              iconSize: [22, 22],
+              iconAnchor: [11, 11]
+            });
+
+            STORES.forEach(store => {
+              const marker = L.marker([store.lat, store.lng], { icon: markerIcon }).addTo(storeMap);
+              const popupContent = `
+                <div style="padding:14px 16px;min-width:200px;font-family:'Inter',sans-serif;">
+                  <div style="font-weight:700;font-size:13px;color:#111;margin-bottom:4px;">${store.name}</div>
+                  <div style="font-size:11px;color:#888;margin-bottom:6px;">${store.address}</div>
+                  ${store.rating ? `<div style="font-size:12px;color:#F40009;font-weight:600;margin-bottom:4px;">★ ${store.rating} <span style="color:#aaa;font-weight:400;">(${store.reviews.toLocaleString()} reviews)</span></div>` : ''}
+                  <div style="font-size:11px;color:#16a34a;font-weight:600;margin-bottom:8px;">● Open · ${store.hours}</div>
+                  <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.name + ' Pokhara Nepal')}" target="_blank" rel="noopener" style="display:inline-block;font-size:11px;font-weight:700;color:#F40009;text-decoration:none;border:1px solid rgba(244,0,9,0.25);border-radius:999px;padding:4px 12px;">Get Directions ↗</a>
+                </div>
+              `;
+              marker.bindPopup(popupContent, { className: 'store-map-popup', maxWidth: 260 });
+              marker.on('click', () => { activeStoreId = store.id; renderStoreList(filteredStores); });
+              mapMarkers[store.id] = marker;
+            });
+
+            setTimeout(() => storeMap.invalidateSize(), 200);
+          }
+
+          // Search
+          storeSearchInput.addEventListener('input', filterStores);
+
+          // Filter chips
+          document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+              document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+              chip.classList.add('active');
+              filterStores();
+            });
+          });
+
+          function filterStores() {
+            const query = storeSearchInput.value.toLowerCase().trim();
+            const activeChip = document.querySelector('.filter-chip.active');
+            const filterType = activeChip ? activeChip.dataset.filter : 'all';
+
+            filteredStores = STORES.filter(s => {
+              const matchSearch = !query ||
+                s.name.toLowerCase().includes(query) ||
+                s.address.toLowerCase().includes(query) ||
+                s.note.toLowerCase().includes(query) ||
+                s.tags.some(t => t.toLowerCase().includes(query));
+
+              const matchFilter =
+                filterType === 'all' ? true :
+                filterType === 'open' ? s.isOpen :
+                s.type === filterType;
+
+              return matchSearch && matchFilter;
+            });
+
+            renderStoreList(filteredStores);
+
+            // Show/hide markers
+            STORES.forEach(s => {
+              const marker = mapMarkers[s.id];
+              if (!marker || !storeMap) return;
+              const isVisible = filteredStores.some(f => f.id === s.id);
+              if (isVisible) { if (!storeMap.hasLayer(marker)) marker.addTo(storeMap); }
+              else { if (storeMap.hasLayer(marker)) storeMap.removeLayer(marker); }
+            });
+          }
+        })();
+    </script>
+</body>
+</html>
 </html>
