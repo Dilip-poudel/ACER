@@ -940,7 +940,165 @@
                     </button>
                 </div>
             </div>
-        </section>
+           
+    <!-- Coca-Cola Events Section -->
+<div class="mt-24 reveal">
+    <div class="text-center mb-12">
+        <span class="text-xs font-semibold tracking-[0.3em] text-coke-red uppercase mb-4 block">Global Events</span>
+        <h2 class="font-inter font-black text-4xl sm:text-5xl lg:text-6xl tracking-tighter text-coke-dark leading-none mb-4">
+            Coca-Cola <span class="text-coke-red">Festivals</span>
+        </h2>
+        <p class="text-sm text-coke-dark/50 max-w-2xl mx-auto font-light">
+            From music to sports, Coca-Cola brings people together at the world's biggest celebrations.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="eventsGrid">
+        <!-- Event 1: Tomorrowland -->
+        <div class="event-card group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer" 
+             data-event="tomorrowland"
+             onclick="openEventModal('tomorrowland')">
+            <div class="aspect-[4/3] overflow-hidden relative">
+                <img 
+                    src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=800&q=80" 
+                    alt="Tomorrowland Festival" 
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <span class="text-xs font-bold tracking-widest text-coke-red uppercase bg-white/20 px-3 py-1 rounded-full">Music</span>
+                <h3 class="font-inter font-bold text-xl mt-2">Tomorrowland</h3>
+                <p class="text-sm text-white/70 font-light">Belgium • 15+ Years Partnership</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-white/50">Electronic</span>
+                    <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                    <span class="text-xs text-white/50">Global</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event 2: Rock in Rio -->
+        <div class="event-card group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer" 
+             data-event="rockinrio"
+             onclick="openEventModal('rockinrio')">
+            <div class="aspect-[4/3] overflow-hidden relative">
+                <img 
+                    src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=800&q=80" 
+                    alt="Rock in Rio Festival" 
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <span class="text-xs font-bold tracking-widest text-coke-red uppercase bg-white/20 px-3 py-1 rounded-full">Music</span>
+                <h3 class="font-inter font-bold text-xl mt-2">Rock in Rio</h3>
+                <p class="text-sm text-white/70 font-light">Brazil • 30 Years Legacy</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-white/50">Rock</span>
+                    <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                    <span class="text-xs text-white/50">Global</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event 3: Coca-Cola Flow Fest -->
+        <div class="event-card group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer" 
+             data-event="flowfest"
+             onclick="openEventModal('flowfest')">
+            <div class="aspect-[4/3] overflow-hidden relative">
+                <img 
+                    src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80" 
+                    alt="Coca-Cola Flow Fest" 
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <span class="text-xs font-bold tracking-widest text-coke-red uppercase bg-white/20 px-3 py-1 rounded-full">Urban</span>
+                <h3 class="font-inter font-bold text-xl mt-2">Coca-Cola Flow Fest</h3>
+                <p class="text-sm text-white/70 font-light">Mexico • World's Largest Urban Festival</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-white/50">Hip-Hop</span>
+                    <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                    <span class="text-xs text-white/50">Iconic</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event 4: FIFA World Cup Fan Parks -->
+        <div class="event-card group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer" 
+             data-event="fifa"
+             onclick="openEventModal('fifa')">
+            <div class="aspect-[4/3] overflow-hidden relative">
+                <img 
+                    src="https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&w=800&q=80" 
+                    alt="FIFA World Cup Fan Parks" 
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <span class="text-xs font-bold tracking-widest text-coke-red uppercase bg-white/20 px-3 py-1 rounded-full">Sports</span>
+                <h3 class="font-inter font-bold text-xl mt-2">FIFA World Cup Fan Parks</h3>
+                <p class="text-sm text-white/70 font-light">Global • 2026 World Cup</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-white/50">Football</span>
+                    <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                    <span class="text-xs text-white/50">Global</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event 5: Sips & Sounds Festival -->
+        <div class="event-card group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer" 
+             data-event="sipsandsounds"
+             onclick="openEventModal('sipsandsounds')">
+            <div class="aspect-[4/3] overflow-hidden relative">
+                <img 
+                    src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=800&q=80" 
+                    alt="Coca-Cola Sips & Sounds Festival" 
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <span class="text-xs font-bold tracking-widest text-coke-red uppercase bg-white/20 px-3 py-1 rounded-full">Music</span>
+                <h3 class="font-inter font-bold text-xl mt-2">Sips & Sounds Festival</h3>
+                <p class="text-sm text-white/70 font-light">Austin, Texas • Annual Event</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-white/50">Variety</span>
+                    <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                    <span class="text-xs text-white/50">USA</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event 6: Special Olympics -->
+        <div class="event-card group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer" 
+             data-event="specialolympics"
+             onclick="openEventModal('specialolympics')">
+            <div class="aspect-[4/3] overflow-hidden relative">
+                <img 
+                    src="https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80" 
+                    alt="Special Olympics" 
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+                <span class="text-xs font-bold tracking-widest text-coke-red uppercase bg-white/20 px-3 py-1 rounded-full">Community</span>
+                <h3 class="font-inter font-bold text-xl mt-2">Special Olympics GB</h3>
+                <p class="text-sm text-white/70 font-light">UK • 50 Years Partnership</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-xs text-white/50">Inclusion</span>
+                    <span class="w-1 h-1 rounded-full bg-white/30"></span>
+                    <span class="text-xs text-white/50">Impact</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     </main>
 
     <!-- Product Detail Modal -->
@@ -2579,6 +2737,346 @@ document.addEventListener('DOMContentLoaded', async function cokeAPIInit() {
           }
         })();
     </script>
+   <!-- ====== EVENT VLOG MODAL (WRITTEN) ====== -->
+<div class="event-modal fixed inset-0 z-[150] flex items-center justify-center bg-coke-dark/80 backdrop-blur-xl px-4 py-6 hidden" id="eventModal" aria-hidden="true">
+    <div class="absolute inset-0" id="eventModalOverlay"></div>
+    <div class="event-modal-card relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-2xl transform transition-all duration-300 scale-95 opacity-0">
+        <!-- Close Button -->
+        <button class="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-coke-dark/5 hover:bg-coke-red hover:text-white transition-all flex items-center justify-center" id="eventModalClose">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+        
+        <!-- Event Header Image -->
+        <div class="relative h-56 lg:h-72 overflow-hidden">
+            <img id="eventModalImage" src="" alt="Event" class="w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <span id="eventModalCategory" class="text-xs font-bold tracking-widest text-coke-red uppercase bg-white/20 px-3 py-1 rounded-full inline-block">Music</span>
+                <h3 id="eventModalTitle" class="font-inter font-black text-2xl lg:text-3xl tracking-tighter mt-2">Event Name</h3>
+                <p id="eventModalLocation" class="text-sm text-white/70 font-light">📍 Location • Year</p>
+            </div>
+        </div>
+        
+        <!-- Vlog Content -->
+        <div class="p-6 lg:p-8">
+            <!-- Vlog Text Content -->
+            <div id="eventVlogContent" class="prose prose-sm max-w-none text-coke-dark/80">
+                <p class="text-sm leading-relaxed">
+                    Vlog content goes here...
+                </p>
+            </div>
+            
+            <!-- Event Details -->
+            <div class="mt-6 grid grid-cols-3 gap-3">
+                <div class="bg-coke-cream rounded-xl p-3 text-center">
+                    <div class="text-xs text-coke-dark/40 font-semibold">Attendees</div>
+                    <div class="font-black text-coke-red text-sm" id="eventModalAttendees">400K+</div>
+                </div>
+                <div class="bg-coke-cream rounded-xl p-3 text-center">
+                    <div class="text-xs text-coke-dark/40 font-semibold">Artists</div>
+                    <div class="font-black text-coke-red text-sm" id="eventModalArtists">200+</div>
+                </div>
+                <div class="bg-coke-cream rounded-xl p-3 text-center">
+                    <div class="text-xs text-coke-dark/40 font-semibold">Countries</div>
+                    <div class="font-black text-coke-red text-sm" id="eventModalCountries">100+</div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex flex-wrap gap-3">
+                <button onclick="closeEventModal()" class="px-6 py-2.5 bg-coke-red text-white font-bold text-sm rounded-full hover:bg-coke-dark transition-all duration-300">
+                    Close
+                </button>
+                <a id="eventModalLink" href="#" target="_blank" class="px-6 py-2.5 border border-coke-red/30 text-coke-red font-bold text-sm rounded-full hover:bg-coke-red hover:text-white transition-all duration-300">
+                    Official Website →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // ============================================
+// EVENT VLOG DATA (WRITTEN)
+// ============================================
+
+const eventData = {
+    tomorrowland: {
+        title: 'Tomorrowland',
+        category: 'Music',
+        location: 'Boom, Belgium • 15+ Years',
+        year: '2025',
+        attendees: '400K+',
+        artists: '300+',
+        countries: '200+',
+        image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.tomorrowland.com',
+        vlog: `
+            <p class="text-sm leading-relaxed mb-4">
+                Tomorrowland is one of the world's largest and most iconic electronic music festivals, held annually in Boom, Belgium. 
+                Since its inception in 2005, it has grown into a global phenomenon, attracting hundreds of thousands of music lovers 
+                from over 200 countries.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                Coca-Cola has been a proud partner of Tomorrowland since 2010, bringing refreshing moments to festival-goers 
+                across the globe. The partnership embodies the festival's spirit of unity, love, and celebration.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                <strong>Highlights:</strong>
+                <ul class="list-disc pl-5 text-sm leading-relaxed text-coke-dark/70">
+                    <li>15+ stages with world-class DJs</li>
+                    <li>Spectacular production and stage design</li>
+                    <li>Global community of music lovers</li>
+                    <li>Coca-Cola refreshment zones throughout the festival</li>
+                </ul>
+            </p>
+            <p class="text-sm leading-relaxed">
+                Tomorrowland represents the magic of music, connection, and shared experiences. Coca-Cola is honored to be part 
+                of this incredible journey.
+            </p>
+        `
+    },
+    rockinrio: {
+        title: 'Rock in Rio',
+        category: 'Music',
+        location: 'Rio de Janeiro, Brazil • 30 Years',
+        year: '2024',
+        attendees: '700K+',
+        artists: '500+',
+        countries: '150+',
+        image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.rockinrio.com',
+        vlog: `
+            <p class="text-sm leading-relaxed mb-4">
+                Rock in Rio is one of the largest music festivals in the world, born in Brazil in 1985. What started as a dream 
+                to bring big rock acts to South America has become a global celebration of music, culture, and unity.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                Coca-Cola has been the official beverage partner of Rock in Rio for over 20 years. Our shared values of joy, 
+                connection, and celebration make this partnership a natural fit.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                <strong>Highlights:</strong>
+                <ul class="list-disc pl-5 text-sm leading-relaxed text-coke-dark/70">
+                    <li>Hosted in Rio de Janeiro, Lisbon, and Madrid</li>
+                    <li>Features rock, pop, and Latin music</li>
+                    <li>Over 700,000 attendees per edition</li>
+                    <li>Coca-Cola "Refreshing Break" zones for festival-goers</li>
+                </ul>
+            </p>
+            <p class="text-sm leading-relaxed">
+                Rock in Rio is more than a festival—it's a celebration of life, music, and the power of shared experiences. 
+                Coca-Cola is proud to be part of this incredible legacy.
+            </p>
+        `
+    },
+    flowfest: {
+        title: 'Coca-Cola Flow Fest',
+        category: 'Urban',
+        location: 'Mexico City, Mexico • Annual',
+        year: '2024',
+        attendees: '250K+',
+        artists: '150+',
+        countries: '100+',
+        image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.flowfest.com',
+        vlog: `
+            <p class="text-sm leading-relaxed mb-4">
+                Coca-Cola Flow Fest is the world's largest urban music festival, celebrating the culture of hip-hop, reggaeton, 
+                and Latin trap. Born in Mexico City, it has become a global reference for urban music and culture.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                Created by Coca-Cola in 2018, Flow Fest was designed to bring urban culture to the mainstream and provide a 
+                platform for emerging artists from around the world.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                <strong>Highlights:</strong>
+                <ul class="list-disc pl-5 text-sm leading-relaxed text-coke-dark/70">
+                    <li>Dedicated to hip-hop, reggaeton, and Latin trap</li>
+                    <li>Features emerging and established artists</li>
+                    <li>Celebrates urban culture and fashion</li>
+                    <li>Coca-Cola's signature "Flow Zone" with interactive experiences</li>
+                </ul>
+            </p>
+            <p class="text-sm leading-relaxed">
+                Flow Fest represents Coca-Cola's commitment to youth culture, creativity, and diversity. It's a celebration of 
+                music, fashion, and self-expression.
+            </p>
+        `
+    },
+    fifa: {
+        title: 'FIFA World Cup Fan Parks',
+        category: 'Sports',
+        location: 'Global • 2026 World Cup',
+        year: '2026',
+        attendees: '1M+',
+        artists: 'N/A',
+        countries: '200+',
+        image: 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.fifa.com',
+        vlog: `
+            <p class="text-sm leading-relaxed mb-4">
+                Coca-Cola and the FIFA World Cup share a long and storied partnership, bringing the joy of football to fans 
+                around the world. The FIFA World Cup Fan Parks are a key part of this collaboration.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                These fan parks are located in host cities across the globe, providing a space for fans to gather, watch matches, 
+                celebrate, and enjoy the beautiful game together.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                <strong>Highlights:</strong>
+                <ul class="list-disc pl-5 text-sm leading-relaxed text-coke-dark/70">
+                    <li>Fan parks in all FIFA World Cup host cities</li>
+                    <li>Live match screenings on massive screens</li>
+                    <li>Interactive games and entertainment</li>
+                    <li>Coca-Cola refreshment zones for fans</li>
+                </ul>
+            </p>
+            <p class="text-sm leading-relaxed">
+                Coca-Cola believes football brings the world together. The FIFA World Cup Fan Parks embody this spirit, creating 
+                moments of joy, connection, and celebration for millions of fans.
+            </p>
+        `
+    },
+    sipsandsounds: {
+        title: 'Sips & Sounds Festival',
+        category: 'Music',
+        location: 'Austin, Texas • Annual',
+        year: '2024',
+        attendees: '100K+',
+        artists: '100+',
+        countries: '50+',
+        image: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.sipsandsounds.com',
+        vlog: `
+            <p class="text-sm leading-relaxed mb-4">
+                Coca-Cola's Sips & Sounds Festival is a vibrant celebration of music, food, and drinks, held annually in Austin, 
+                Texas—the "Live Music Capital of the World."
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                The festival brings together the best of Austin's vibrant culture with live performances from top artists, 
+                delicious food from local vendors, and, of course, refreshing Coca-Cola.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                <strong>Highlights:</strong>
+                <ul class="list-disc pl-5 text-sm leading-relaxed text-coke-dark/70">
+                    <li>Multiple stages with diverse music genres</li>
+                    <li>Local food and beverage vendors</li>
+                    <li>Interactive experiences and activations</li>
+                    <li>Coca-Cola's signature "Sips Bar"</li>
+                </ul>
+            </p>
+            <p class="text-sm leading-relaxed">
+                Sips & Sounds is a celebration of community, culture, and the simple joy of good music and great refreshment. 
+                Coca-Cola is proud to bring this experience to Austin and beyond.
+            </p>
+        `
+    },
+    specialolympics: {
+        title: 'Special Olympics GB',
+        category: 'Community',
+        location: 'United Kingdom • 50 Years',
+        year: '2024',
+        attendees: '50K+',
+        artists: 'N/A',
+        countries: '100+',
+        image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80',
+        link: 'https://www.specialolympics.org',
+        vlog: `
+            <p class="text-sm leading-relaxed mb-4">
+                Coca-Cola's partnership with Special Olympics GB is one of the longest-running and most meaningful in our 
+                company's history. For over 50 years, we have supported inclusion and empowerment through sport.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                Special Olympics GB provides year-round sports training and competition for children and adults with intellectual 
+                disabilities. Coca-Cola is proud to support this mission and the incredible athletes who inspire us every day.
+            </p>
+            <p class="text-sm leading-relaxed mb-4">
+                <strong>Highlights:</strong>
+                <ul class="list-disc pl-5 text-sm leading-relaxed text-coke-dark/70">
+                    <li>50+ years of partnership</li>
+                    <li>Support for athletes and families</li>
+                    <li>Promoting inclusion and diversity</li>
+                    <li>Coca-Cola refreshment for athletes and volunteers</li>
+                </ul>
+            </p>
+            <p class="text-sm leading-relaxed">
+                Our partnership with Special Olympics GB reflects our commitment to creating a more inclusive world. Every athlete 
+                deserves a refreshing moment and the opportunity to shine.
+            </p>
+        `
+    }
+};
+
+// Get modal elements
+const eventModal = document.getElementById('eventModal');
+const eventModalOverlay = document.getElementById('eventModalOverlay');
+const eventModalClose = document.getElementById('eventModalClose');
+
+// Open modal function
+function openEventModal(eventId) {
+    const data = eventData[eventId];
+    if (!data) {
+        console.error('Event not found:', eventId);
+        return;
+    }
+    
+    // Set content
+    document.getElementById('eventModalCategory').textContent = data.category;
+    document.getElementById('eventModalTitle').textContent = data.title;
+    document.getElementById('eventModalLocation').textContent = '📍 ' + data.location;
+    document.getElementById('eventModalImage').src = data.image;
+    document.getElementById('eventModalAttendees').textContent = data.attendees;
+    document.getElementById('eventModalArtists').textContent = data.artists;
+    document.getElementById('eventModalCountries').textContent = data.countries;
+    document.getElementById('eventModalLink').href = data.link;
+    document.getElementById('eventVlogContent').innerHTML = data.vlog;
+    
+    // Show modal
+    eventModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Animate in
+    setTimeout(() => {
+        const card = eventModal.querySelector('.event-modal-card');
+        card.classList.remove('scale-95', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+    }, 50);
+}
+
+// Close modal function
+function closeEventModal() {
+    const card = eventModal.querySelector('.event-modal-card');
+    card.classList.remove('scale-100', 'opacity-100');
+    card.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+        eventModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }, 300);
+}
+
+// Close events
+if (eventModalClose) {
+    eventModalClose.addEventListener('click', closeEventModal);
+}
+if (eventModalOverlay) {
+    eventModalOverlay.addEventListener('click', closeEventModal);
+}
+
+// Close with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !eventModal.classList.contains('hidden')) {
+        closeEventModal();
+    }
+});
+
+// Make functions globally accessible
+window.openEventModal = openEventModal;
+window.closeEventModal = closeEventModal;
+</script>
+</body>
+</html>
 </body>
 </html>
 </html>
